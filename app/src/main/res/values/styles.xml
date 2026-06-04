@@ -30,4 +30,20 @@
         <item name="android:textSize">14sp</item>
     </style>
 
+    <style name="TextAppearance.GenStream.BodySmall">
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="TextAppearance.GenStream.BodySmallBold">
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="TextAppearance.GenStream.SecondaryBodySmall">
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+
 </resources>

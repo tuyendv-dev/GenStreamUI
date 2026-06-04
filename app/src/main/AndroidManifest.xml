@@ -15,7 +15,7 @@
         android:theme="@style/Theme.GenStreamUI">
         <activity
             android:name=".MainActivity"
-            android:screenOrientation="landscape"
+            android:screenOrientation="sensorLandscape"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -26,7 +26,12 @@
         
         <activity
             android:name=".PlayGameActivity"
-            android:screenOrientation="landscape"
+            android:screenOrientation="sensorLandscape"
+            android:exported="false" />
+
+        <activity
+            android:name=".setting.SettingActivity"
+            android:screenOrientation="sensorLandscape"
             android:exported="false" />
     </application>
 
