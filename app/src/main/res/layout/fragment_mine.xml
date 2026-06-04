@@ -5,18 +5,401 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/bg_color">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Mine Fragment"
-        android:textColor="@color/white"
-        android:textSize="24sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        xmlns:app="http://schemas.android.com/apk/res-auto" />
+    <!-- Steam game grid background collage (only visible on Steam selection) -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layoutSteamGrid"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/bg_color"
+        android:visibility="gone">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:weightSum="2">
+
+            <!-- Row 1 of posters -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                android:weightSum="4">
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/image_1"
+                    android:alpha="0.85"
+                    android:layout_margin="8dp" />
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/image_2"
+                    android:alpha="0.85"
+                    android:layout_margin="8dp" />
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/image_3"
+                    android:alpha="0.85"
+                    android:layout_margin="8dp" />
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/image_4"
+                    android:alpha="0.85"
+                    android:layout_margin="8dp" />
+            </LinearLayout>
+
+            <!-- Row 2 of posters -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                android:weightSum="4">
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/image_5"
+                    android:alpha="0.85"
+                    android:layout_margin="8dp" />
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/image_4"
+                    android:alpha="0.85"
+                    android:layout_margin="8dp" />
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/image_1"
+                    android:alpha="0.85"
+                    android:layout_margin="8dp" />
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/image_banner"
+                    android:alpha="0.85"
+                    android:layout_margin="8dp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Extra dark blue/black overlay to blend the grid nicely -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#40060B12" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Ghosted background icon on the right -->
+    <ImageView
+        android:id="@+id/ivGhostIcon"
+        android:layout_width="320dp"
+        android:layout_height="320dp"
+        android:scaleType="fitCenter"
+        android:alpha="0.8"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginEnd="40dp"
+        android:visibility="gone" />
+
+    <!-- Dark overlay to ensure contrast -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#33000000" />
+
+    <!-- Left half gradient overlay -->
+    <View
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_gradient_left_half"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintWidth_percent="0.6" />
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <!-- Scrollable Row of Tiles -->
+            <HorizontalScrollView
+                android:id="@+id/horizontalScrollViewTiles"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:clipToPadding="false"
+                android:clipChildren="false"
+                android:scrollbars="none"
+                android:paddingStart="56dp"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginTop="36dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <LinearLayout
+                    android:id="@+id/linearLayoutTiles"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:clipToPadding="false"
+                    android:clipChildren="false" />
+            </HorizontalScrollView>
+
+            <!-- Description Details Panel -->
+            <LinearLayout
+                android:id="@+id/layoutDetails"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginStart="66dp"
+                android:layout_marginTop="6dp"
+                android:layout_marginEnd="66dp"
+                app:layout_constraintTop_toBottomOf="@id/horizontalScrollViewTiles"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <TextView
+                    android:id="@+id/tvTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="View Game Library"
+                    style="@style/TextAppearance.GenStream.Title" />
+
+                <TextView
+                    android:id="@+id/tvDescription"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Easily manage your favorite games on PC, mobile, PS, Xbox, and more"
+                    style="@style/TextAppearance.GenStream.Body" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnAction"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    app:backgroundTint="#20FFFFFF"
+                    android:textAppearance="@style/TextAppearance.GenStream.TitleButton"
+                    app:cornerRadius="8dp"
+                    android:textAllCaps="false"
+                    android:paddingHorizontal="50dp"
+                    android:paddingVertical="12dp"
+                    android:gravity="center"
+                    app:iconPadding="8dp"
+                    app:iconTint="@color/white"
+                    android:visibility="gone" />
+
+                <!-- User Info Panel (Epic Games) -->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/layoutUserInfo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:background="@drawable/bg_user_panel"
+                    android:padding="16dp"
+                    android:visibility="gone">
+
+                    <ImageView
+                        android:id="@+id/ivAvatar"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:src="@drawable/ic_avatar_default"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent" />
+
+                    <TextView
+                        android:id="@+id/tvUsername"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Linhlinh1212"
+                        style="@style/TextAppearance.GenStream.BodyBold"
+                        android:layout_marginStart="16dp"
+                        app:layout_constraintStart_toEndOf="@id/ivAvatar"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnSwitch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:text="Switch"
+                        android:textAllCaps="false"
+                        android:textAppearance="@style/TextAppearance.GenStream.Body"
+                        app:backgroundTint="#33FFFFFF"
+                        app:cornerRadius="8dp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginStart="16dp"
+                        app:layout_constraintStart_toEndOf="@id/ivAvatar"
+                        app:layout_constraintTop_toBottomOf="@id/tvUsername"
+                        app:layout_constraintBottom_toBottomOf="parent" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnSignOut"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:text="Sign out"
+                        android:textAllCaps="false"
+                        android:textAppearance="@style/TextAppearance.GenStream.Body"
+                        app:backgroundTint="#33FFFFFF"
+                        app:cornerRadius="8dp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:layout_marginStart="8dp"
+                        app:layout_constraintStart_toEndOf="@id/btnSwitch"
+                        app:layout_constraintTop_toTopOf="@id/btnSwitch"
+                        app:layout_constraintBottom_toBottomOf="@id/btnSwitch" />
+
+                    <TextView
+                        android:id="@+id/tvLevelNumber"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:text="1"
+                        style="@style/TextAppearance.GenStream.BodyBold"
+                        android:gravity="center"
+                        android:background="@drawable/bg_level_circle"
+                        android:layout_marginStart="24dp"
+                        app:layout_constraintStart_toEndOf="@id/btnSignOut"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent" />
+
+                    <TextView
+                        android:id="@+id/tvLevelLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Level"
+                        style="@style/TextAppearance.GenStream.BodyBold"
+                        android:layout_marginStart="8dp"
+                        app:layout_constraintStart_toEndOf="@id/tvLevelNumber"
+                        app:layout_constraintTop_toTopOf="@id/tvLevelNumber"
+                        app:layout_constraintBottom_toBottomOf="@id/tvLevelNumber" />
+
+                    <View
+                        android:id="@+id/vDivider"
+                        android:layout_width="1dp"
+                        android:layout_height="36dp"
+                        android:background="#4DFFFFFF"
+                        android:layout_marginStart="24dp"
+                        app:layout_constraintStart_toEndOf="@id/tvLevelLabel"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent" />
+
+                    <!-- Stats -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginStart="24dp"
+                        app:layout_constraintStart_toEndOf="@id/vDivider"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Play time"
+                                style="@style/TextAppearance.GenStream.SecondaryBody" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="6"
+                                style="@style/TextAppearance.GenStream.Title"
+                                android:layout_marginTop="4dp" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Games"
+                                style="@style/TextAppearance.GenStream.SecondaryBody" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="1"
+                                style="@style/TextAppearance.GenStream.Title"
+                                android:layout_marginTop="4dp" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1.2"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Amount ($)"
+                                style="@style/TextAppearance.GenStream.SecondaryBody" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="59.99"
+                                style="@style/TextAppearance.GenStream.Title"
+                                android:layout_marginTop="4dp" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- Bottom prompt graphics and metadata -->
     <ImageView
         android:id="@+id/footer"
         android:layout_width="wrap_content"

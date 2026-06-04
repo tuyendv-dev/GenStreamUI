@@ -26,6 +26,21 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         
         setupViewPager()
+        updateTime()
+    }
+
+    private fun updateTime() {
+        val sdf = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
+        binding.statusIcons.tvStatusTime.text = sdf.format(java.util.Date())
+        
+        binding.statusIcons.tvStatusTime.postDelayed(object : Runnable {
+            override fun run() {
+                _binding?.let {
+                    it.statusIcons.tvStatusTime.text = sdf.format(java.util.Date())
+                    it.statusIcons.tvStatusTime.postDelayed(this, 60000)
+                }
+            }
+        }, 60000)
     }
 
     private fun setupViewPager() {
