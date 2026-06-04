@@ -33,6 +33,11 @@
             android:name=".setting.SettingActivity"
             android:screenOrientation="sensorLandscape"
             android:exported="false" />
+            
+        <activity
+            android:name=".device.DeviceActivity"
+            android:screenOrientation="sensorLandscape"
+            android:exported="false" />
     </application>
 
 </manifest>

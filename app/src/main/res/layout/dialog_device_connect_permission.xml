@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_dialog_permission"
+    android:padding="24dp">
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Controller permission"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/btnClose" />
+
+    <!-- Close Button -->
+    <ImageView
+        android:id="@+id/btnClose"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/ic_close"
+        app:tint="#FFFFFF"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/tvTitle" />
+
+    <!-- Bluetooth Item -->
+    <ImageView
+        android:id="@+id/ivBluetooth"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/ic_bluetooth"
+        app:tint="#FFFFFF"
+        android:layout_marginTop="32dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvTitle" />
+
+    <LinearLayout
+        android:id="@+id/llBluetoothTexts"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintStart_toEndOf="@id/ivBluetooth"
+        app:layout_constraintEnd_toStartOf="@id/ivBluetoothCheck"
+        app:layout_constraintTop_toTopOf="@id/ivBluetooth">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Enable Bluetooth"
+            android:textColor="#FFFFFF"
+            android:textAppearance="@style/TextAppearance.GenStream.Body" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="The controller cannot connect properly if\nBluetooth is not enable"
+            android:textColor="@color/white"
+            android:textSize="13sp"
+            android:layout_marginTop="4dp" />
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/ivBluetoothCheck"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/ic_checkbox_checked"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/ivBluetooth"
+        app:layout_constraintBottom_toBottomOf="@id/llBluetoothTexts" />
+
+    <!-- Location Item -->
+    <ImageView
+        android:id="@+id/ivLocation"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/ic_location"
+        app:tint="#FFFFFF"
+        android:layout_marginTop="24dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/llBluetoothTexts" />
+
+    <TextView
+        android:id="@+id/tvLocationText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Authorize “Location information” or\n“Discover Nearby Devices”"
+        android:textColor="#FFFFFF"
+        android:textAppearance="@style/TextAppearance.GenStream.Body"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintStart_toEndOf="@id/ivLocation"
+        app:layout_constraintEnd_toStartOf="@id/ivLocationCheck"
+        app:layout_constraintTop_toTopOf="@id/ivLocation"
+        app:layout_constraintBottom_toBottomOf="@id/ivLocation" />
+
+    <ImageView
+        android:id="@+id/ivLocationCheck"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/ic_checkbox_checked"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/ivLocation"
+        app:layout_constraintBottom_toBottomOf="@id/ivLocation" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

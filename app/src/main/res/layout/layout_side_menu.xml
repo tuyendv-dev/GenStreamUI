@@ -119,6 +119,7 @@
         <!-- Menu Item: Steam Account Management -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/menuItemSteam"
+            android:visibility="gone"
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:layout_marginBottom="8dp">
@@ -211,6 +212,7 @@
 
         <!-- Menu Item: User Center -->
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:visibility="gone"
             android:id="@+id/menuItemUserCenter"
             android:layout_width="match_parent"
             android:layout_height="56dp">

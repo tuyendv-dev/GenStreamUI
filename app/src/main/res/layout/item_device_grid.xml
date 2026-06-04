@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:layout_marginHorizontal="8dp"
+    android:layout_marginVertical="12dp">
+
+    <FrameLayout
+        android:id="@+id/cardDevice"
+        android:layout_width="110dp"
+        android:layout_height="110dp"
+        android:background="@drawable/bg_device_item"
+        android:padding="12dp">
+
+        <ImageView
+            android:id="@+id/ivDeviceIcon"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:scaleType="fitCenter" />
+            
+        <TextView
+            android:id="@+id/tvAddIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="+"
+            android:textColor="#FFFFFF"
+            android:textSize="48sp"
+            android:visibility="gone"
+            android:layout_gravity="center"/>
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/tvDeviceName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:textAppearance="@style/TextAppearance.GenStream.Body"
+        android:textAlignment="center"
+        android:lines="1"
+        android:ellipsize="end" />
+
+</LinearLayout>

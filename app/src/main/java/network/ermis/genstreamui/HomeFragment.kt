@@ -10,6 +10,7 @@ import com.google.android.material.tabs.TabLayoutMediator
 import android.content.Intent
 import androidx.core.view.GravityCompat
 import network.ermis.genstreamui.databinding.FragmentHomeBinding
+import network.ermis.genstreamui.device.DeviceActivity
 import network.ermis.genstreamui.setting.SettingActivity
 
 class HomeFragment : Fragment() {
@@ -31,12 +32,27 @@ class HomeFragment : Fragment() {
         setupViewPager()
         updateTime()
 
+        // Add scale click effects
+        binding.btnMenu.addScaleClickEffect()
+        binding.sideMenu.menuItemHome.addScaleClickEffect()
+        binding.sideMenu.menuItemGame.addScaleClickEffect()
+        binding.sideMenu.menuItemSteam.addScaleClickEffect()
+        binding.sideMenu.menuItemSetting.addScaleClickEffect()
+        binding.sideMenu.menuItemDevice.addScaleClickEffect()
+        binding.sideMenu.menuItemUserCenter.addScaleClickEffect()
+
         binding.btnMenu.setOnClickListener {
             binding.drawerLayout.openDrawer(GravityCompat.START)
         }
 
         binding.sideMenu.menuItemSetting.setOnClickListener {
             val intent = Intent(requireContext(), SettingActivity::class.java)
+            startActivity(intent)
+            binding.drawerLayout.closeDrawer(GravityCompat.START)
+        }
+        
+        binding.sideMenu.menuItemDevice.setOnClickListener {
+            val intent = Intent(requireContext(), DeviceActivity::class.java)
             startActivity(intent)
             binding.drawerLayout.closeDrawer(GravityCompat.START)
         }
