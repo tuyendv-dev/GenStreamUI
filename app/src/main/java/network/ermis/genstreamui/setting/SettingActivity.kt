@@ -51,6 +51,7 @@ class SettingActivity : AppCompatActivity() {
         val categoryAdapter = SettingCategoryAdapter(categories) { selectedCategory ->
             binding.rvItems.alpha = 0f
             itemAdapter.updateItems(selectedCategory.items)
+            binding.rvItems.scrollToPosition(0)
             binding.rvItems.animate().alpha(1f).setDuration(300).start()
         }
         binding.rvCategories.adapter = categoryAdapter

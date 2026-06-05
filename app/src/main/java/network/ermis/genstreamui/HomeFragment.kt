@@ -13,6 +13,7 @@ import network.ermis.genstreamui.databinding.FragmentHomeBinding
 import network.ermis.genstreamui.device.DeviceActivity
 import network.ermis.genstreamui.setting.SettingActivity
 import network.ermis.genstreamui.setting.UserProfileActivity
+import network.ermis.genstreamui.subscription.SubscriptionActivity
 
 class HomeFragment : Fragment() {
 
@@ -61,6 +62,12 @@ class HomeFragment : Fragment() {
         
         binding.sideMenu.menuItemDevice.setOnClickListener {
             val intent = Intent(requireContext(), DeviceActivity::class.java)
+            startActivity(intent)
+            binding.drawerLayout.closeDrawer(GravityCompat.START)
+        }
+
+        binding.sideMenu.menuItemGame.setOnClickListener {
+            val intent = Intent(requireContext(), SubscriptionActivity::class.java)
             startActivity(intent)
             binding.drawerLayout.closeDrawer(GravityCompat.START)
         }
