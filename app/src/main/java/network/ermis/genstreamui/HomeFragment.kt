@@ -12,6 +12,7 @@ import androidx.core.view.GravityCompat
 import network.ermis.genstreamui.databinding.FragmentHomeBinding
 import network.ermis.genstreamui.device.DeviceActivity
 import network.ermis.genstreamui.setting.SettingActivity
+import network.ermis.genstreamui.setting.UserProfileActivity
 
 class HomeFragment : Fragment() {
 
@@ -33,6 +34,7 @@ class HomeFragment : Fragment() {
         updateTime()
 
         // Add scale click effects
+        binding.sideMenu.layoutUserProfile.addScaleClickEffect()
         binding.btnMenu.addScaleClickEffect()
         binding.sideMenu.menuItemHome.addScaleClickEffect()
         binding.sideMenu.menuItemGame.addScaleClickEffect()
@@ -43,6 +45,12 @@ class HomeFragment : Fragment() {
 
         binding.btnMenu.setOnClickListener {
             binding.drawerLayout.openDrawer(GravityCompat.START)
+        }
+
+        binding.sideMenu.layoutUserProfile.setOnClickListener {
+            val intent = Intent(requireContext(), UserProfileActivity::class.java)
+            startActivity(intent)
+            binding.drawerLayout.closeDrawer(GravityCompat.START)
         }
 
         binding.sideMenu.menuItemSetting.setOnClickListener {
