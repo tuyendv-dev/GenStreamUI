@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.SimpleItemAnimator
 import network.ermis.genstreamui.R
 import network.ermis.genstreamui.databinding.FragmentDeviceListBinding
 
@@ -43,6 +44,9 @@ class DeviceListFragment : Fragment() {
 
         // Setup Left Category list
         binding.rvCategories.layoutManager = LinearLayoutManager(requireContext())
+        // Tắt change-animation để notifyItemChanged khi đổi selection không detach
+        // view đang focus (tránh phải nhấn D-pad nhiều lần mới di chuyển được).
+        (binding.rvCategories.itemAnimator as? SimpleItemAnimator)?.supportsChangeAnimations = false
         val categoryAdapter = DeviceCategoryAdapter(categories) { selectedCategory ->
             binding.rvItems.alpha = 0f
             gridAdapter.updateItems(selectedCategory.items)
@@ -80,6 +84,24 @@ class DeviceListFragment : Fragment() {
                 )
             )
         )
+    }
+
+    /**
+     * Ép focus về category đầu tiên của danh sách trái. Có retry vì lúc cửa sổ
+     * nhận focus RecyclerView có thể chưa layout xong (khi đó danh sách phải có
+     * thể giành mất focus), khiến lần nhấn D-pad đầu tiên bị "trễ".
+     */
+    fun focusFirstCategory(attempt: Int = 0) {
+        val rv = _binding?.rvCategories ?: return
+        val firstItem = rv.findViewHolderForAdapterPosition(0)?.itemView ?: rv.getChildAt(0)
+        if (firstItem != null) {
+            firstItem.requestFocus()
+            if (!firstItem.isFocused && attempt < 5) {
+                rv.postDelayed({ focusFirstCategory(attempt + 1) }, 16L)
+            }
+        } else if (attempt < 10) {
+            rv.postDelayed({ focusFirstCategory(attempt + 1) }, 16L)
+        }
     }
 
     override fun onDestroyView() {

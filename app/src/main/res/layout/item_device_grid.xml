@@ -4,7 +4,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="8dp"
-    android:layout_marginVertical="12dp">
+    android:layout_marginVertical="12dp"
+    android:focusable="true"
+    android:clickable="true">
 
     <FrameLayout
         android:id="@+id/cardDevice"
@@ -15,6 +17,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:background="@drawable/bg_device_item"
+        android:duplicateParentState="true"
+        android:foreground="@drawable/bg_device_grid_focus"
         android:padding="12dp">
 
         <ImageView

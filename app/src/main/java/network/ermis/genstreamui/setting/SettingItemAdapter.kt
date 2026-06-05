@@ -40,11 +40,39 @@ class SettingItemAdapter(
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val item = items[position]
+        
+        holder.itemView.setOnKeyListener { v, keyCode, event ->
+            if (event.action == android.view.KeyEvent.ACTION_DOWN) {
+                when (keyCode) {
+                    android.view.KeyEvent.KEYCODE_DPAD_LEFT -> {
+                        val rvCategories = v.rootView.findViewById<RecyclerView>(R.id.rvCategories)
+                        var handled = false
+                        for (i in 0 until (rvCategories?.childCount ?: 0)) {
+                            val child = rvCategories?.getChildAt(i)
+                            if (child?.isSelected == true) {
+                                child.requestFocus()
+                                handled = true
+                                break
+                            }
+                        }
+                        handled
+                    }
+                    android.view.KeyEvent.KEYCODE_DPAD_UP -> {
+                        holder.adapterPosition == 0
+                    }
+                    android.view.KeyEvent.KEYCODE_DPAD_DOWN -> {
+                        holder.adapterPosition == itemCount - 1
+                    }
+                    else -> false
+                }
+            } else {
+                false
+            }
+        }
         if (holder is ToggleViewHolder) {
             holder.binding.tvSettingTitle.text = item.title
             holder.binding.tvSettingDesc.text = item.description
-            holder.binding.tvSettingDesc.visibility = if (item.description.isNotEmpty()) View.VISIBLE else View.GONE
-            
+
             holder.binding.ivToggle.setImageResource(if (item.isEnabled) R.drawable.ic_checkbox_checked else R.drawable.ic_checkbox_unchecked)
             
             holder.itemView.setOnClickListener {
@@ -55,8 +83,7 @@ class SettingItemAdapter(
         } else if (holder is ArrowViewHolder) {
             holder.binding.tvSettingTitle.text = item.title
             holder.binding.tvSettingDesc.text = item.description
-            holder.binding.tvSettingDesc.visibility = if (item.description.isNotEmpty()) View.VISIBLE else View.GONE
-            
+
             if (item.value != null) {
                 holder.binding.tvSettingValue.text = item.value
                 holder.binding.tvSettingValue.visibility = View.VISIBLE

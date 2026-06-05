@@ -3,10 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="8dp"
+    android:layout_marginBottom="4dp"
     android:layout_marginEnd="8dp"
+    android:paddingVertical="4dp"
+    android:paddingHorizontal="8dp"
     android:clickable="true"
-    android:focusable="true">
+    android:focusable="true"
+    android:background="@drawable/bg_setting_toggle_selector">
 
     <TextView
         android:id="@+id/tvSettingTitle"

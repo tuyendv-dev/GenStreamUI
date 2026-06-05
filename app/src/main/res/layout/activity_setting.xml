@@ -13,6 +13,7 @@
         android:layout_height="78dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
+        android:descendantFocusability="blocksDescendants"
         android:paddingHorizontal="20dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -23,6 +24,7 @@
             android:layout_width="36dp"
             android:layout_height="36dp"
             android:padding="6dp"
+            android:focusable="true"
             android:src="@drawable/ic_back"
             app:tint="@color/white" />
 
@@ -58,6 +60,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:focusedByDefault="true"
             android:scrollbars="vertical"
             android:clipToPadding="false"
             android:paddingTop="6dp"
@@ -75,8 +78,8 @@
             android:clipToPadding="false"
             android:paddingTop="1dp"
             android:paddingBottom="80dp"
-            android:paddingStart="16dp"
-            android:paddingEnd="32dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="24dp"
             tools:listitem="@layout/item_setting_toggle" />
     </LinearLayout>
 

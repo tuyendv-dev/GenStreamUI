@@ -39,6 +39,9 @@ class DeviceConnectFragment : Fragment() {
 
         binding.btnReconnect.addScaleClickEffect()
         binding.btnViewTutorial.addScaleClickEffect()
+
+        // Đưa focus về nút Connect để điều hướng bằng tay cầm/D-pad ngay khi vào màn.
+        binding.btnConnect.post { binding.btnConnect.requestFocus() }
     }
 
     companion object {

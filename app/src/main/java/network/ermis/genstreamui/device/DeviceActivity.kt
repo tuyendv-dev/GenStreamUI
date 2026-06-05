@@ -1,6 +1,7 @@
 package network.ermis.genstreamui.device
 
 import android.os.Bundle
+import android.view.KeyEvent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
@@ -12,6 +13,7 @@ import network.ermis.genstreamui.databinding.ActivityDeviceBinding
 class DeviceActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityDeviceBinding
+    private var initialFocusDone = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,6 +34,25 @@ class DeviceActivity : AppCompatActivity() {
                 .replace(R.id.fragmentContainer, DeviceListFragment())
                 .commit()
         }
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        // Đặt focus ban đầu lên category đầu tiên của danh sách trái ngay khi cửa
+        // sổ thực sự nhận focus, để lần nhấn D-pad đầu tiên có hiệu lực luôn.
+        if (hasFocus && !initialFocusDone) {
+            initialFocusDone = true
+            val fragment = supportFragmentManager.findFragmentById(R.id.fragmentContainer)
+            (fragment as? DeviceListFragment)?.focusFirstCategory()
+        }
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_BUTTON_B) {
+            handleBack()
+            return true
+        }
+        return super.onKeyDown(keyCode, event)
     }
 
     override fun onBackPressed() {
