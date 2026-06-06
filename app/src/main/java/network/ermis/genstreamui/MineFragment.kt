@@ -116,6 +116,34 @@ class MineFragment : Fragment() {
             tileBinding.root.setOnClickListener {
                 selectCard(index, smoothScroll = true)
             }
+            
+            tileBinding.root.isFocusable = true
+            tileBinding.root.setOnFocusChangeListener { v, hasFocus ->
+                if (hasFocus) {
+                    tileBinding.cardView.strokeWidth = dpToPx(1)
+                    tileBinding.cardView.setStrokeColor(Color.parseColor("#E4E5E5"))
+                    selectCard(index, smoothScroll = true)
+                } else {
+                    tileBinding.cardView.strokeWidth = dpToPx(0)
+                    v.isFocusableInTouchMode = false
+                }
+            }
+            
+            tileBinding.root.setOnKeyListener { _, keyCode, event ->
+                if (event.action == android.view.KeyEvent.ACTION_DOWN) {
+                    when (keyCode) {
+                        android.view.KeyEvent.KEYCODE_DPAD_LEFT -> {
+                            index == 0
+                        }
+                        android.view.KeyEvent.KEYCODE_DPAD_RIGHT -> {
+                            index == tileItems.size - 1
+                        }
+                        else -> false
+                    }
+                } else {
+                    false
+                }
+            }
 
             binding.linearLayoutTiles.addView(tileBinding.root)
             tileBindings.add(tileBinding)
@@ -169,15 +197,19 @@ class MineFragment : Fragment() {
         if (prevIndex != -1 && prevIndex < tileBindings.size) {
             val prevBinding = tileBindings[prevIndex]
             prevBinding.cardView.animate().scaleX(1.0f).scaleY(1.0f).setDuration(250).start()
-            prevBinding.cardView.strokeWidth = dpToPx(0)
             prevBinding.badgeEnter.visibility = View.GONE
         }
 
         // Animate new item up to 1.5x scale
         val newBinding = tileBindings[position]
         newBinding.cardView.animate().scaleX(1.4f).scaleY(1.4f).setDuration(250).start()
-        newBinding.cardView.strokeWidth = dpToPx(1)
         newBinding.badgeEnter.visibility = View.VISIBLE
+        
+        binding.horizontalScrollViewTiles.selectedChildView = newBinding.root
+
+        // Đảm bảo item nhận được focus ngay cả trong Touch mode
+        newBinding.root.isFocusableInTouchMode = true
+        newBinding.root.requestFocus()
 
         // Update details panel & background theme
         updateDetailsAndBackground(position)

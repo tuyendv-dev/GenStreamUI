@@ -158,7 +158,7 @@
             android:layout_height="wrap_content">
 
             <!-- Scrollable Row of Tiles -->
-            <HorizontalScrollView
+            <network.ermis.genstreamui.widget.FocusRetainingHorizontalScrollView
                 android:id="@+id/horizontalScrollViewTiles"
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
@@ -178,7 +178,7 @@
                     android:orientation="horizontal"
                     android:clipToPadding="false"
                     android:clipChildren="false" />
-            </HorizontalScrollView>
+            </network.ermis.genstreamui.widget.FocusRetainingHorizontalScrollView>
 
             <!-- Description Details Panel -->
             <LinearLayout
@@ -222,6 +222,11 @@
                     android:gravity="center"
                     app:iconPadding="8dp"
                     app:iconTint="@color/white"
+                    app:strokeColor="@color/color_button_stroke_focus"
+                    app:strokeWidth="1dp"
+                    android:focusable="true"
+                    android:nextFocusLeft="@id/btnAction"
+                    android:nextFocusRight="@id/btnAction"
                     android:visibility="gone" />
 
                 <!-- User Info Panel (Epic Games) -->
@@ -266,6 +271,11 @@
                         android:insetBottom="0dp"
                         android:layout_marginTop="8dp"
                         android:layout_marginStart="16dp"
+                        app:strokeColor="@color/color_button_stroke_focus"
+                        app:strokeWidth="1dp"
+                        android:focusable="true"
+                        android:nextFocusLeft="@id/btnSwitch"
+                        android:nextFocusRight="@id/btnSignOut"
                         app:layout_constraintStart_toEndOf="@id/ivAvatar"
                         app:layout_constraintTop_toBottomOf="@id/tvUsername"
                         app:layout_constraintBottom_toBottomOf="parent" />
@@ -282,6 +292,11 @@
                         android:insetTop="0dp"
                         android:insetBottom="0dp"
                         android:layout_marginStart="8dp"
+                        app:strokeColor="@color/color_button_stroke_focus"
+                        app:strokeWidth="1dp"
+                        android:focusable="true"
+                        android:nextFocusLeft="@id/btnSwitch"
+                        android:nextFocusRight="@id/btnSignOut"
                         app:layout_constraintStart_toEndOf="@id/btnSwitch"
                         app:layout_constraintTop_toTopOf="@id/btnSwitch"
                         app:layout_constraintBottom_toBottomOf="@id/btnSwitch" />

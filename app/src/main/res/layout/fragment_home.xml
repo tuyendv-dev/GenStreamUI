@@ -29,20 +29,71 @@
             android:layout_width="36dp"
             android:layout_height="36dp"
             android:padding="6dp"
+            android:focusable="true"
+            android:nextFocusUp="@id/btnMenu"
+            android:nextFocusLeft="@id/btnMenu"
+            android:nextFocusRight="@id/tabMine"
+            android:background="@drawable/bg_view_selector"
             android:src="@drawable/ic_menu"
             app:tint="@color/white" />
 
-        <com.google.android.material.tabs.TabLayout
+        <LinearLayout
             android:id="@+id/tabLayout"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_marginStart="16dp"
-            android:background="@android:color/transparent"
-            app:tabIndicatorHeight="0dp"
-            app:tabRippleColor="@null"
-            app:tabSelectedTextColor="@color/text_primary"
-            app:tabTextColor="@color/text_secondary"
-            app:tabTextAppearance="@style/TabLayoutTextAppearance" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            
+            <TextView
+                android:id="@+id/tabMine"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp"
+                android:text="Mine"
+                android:textColor="@color/text_secondary"
+                android:textSize="18sp"
+                android:clickable="true"
+                android:focusable="true"
+                android:nextFocusUp="@id/tabMine"
+                android:nextFocusLeft="@id/btnMenu"
+                android:nextFocusRight="@id/tabDiscovery"
+                android:background="@drawable/bg_view_selector" />
+
+            <TextView
+                android:id="@+id/tabDiscovery"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp"
+                android:text="Discovery"
+                android:textColor="@color/text_primary"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:clickable="true"
+                android:focusable="true"
+                android:nextFocusUp="@id/tabDiscovery"
+                android:nextFocusLeft="@id/tabMine"
+                android:nextFocusRight="@id/tabFindGame"
+                android:background="@drawable/bg_view_selector" />
+
+            <TextView
+                android:id="@+id/tabFindGame"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp"
+                android:text="Find game"
+                android:textColor="@color/text_secondary"
+                android:textSize="18sp"
+                android:clickable="true"
+                android:focusable="true"
+                android:nextFocusUp="@id/tabFindGame"
+                android:nextFocusLeft="@id/tabDiscovery"
+                android:nextFocusRight="@id/ivStatusSearch"
+                android:background="@drawable/bg_view_selector" />
+        </LinearLayout>
 
         <Space
             android:layout_width="0dp"

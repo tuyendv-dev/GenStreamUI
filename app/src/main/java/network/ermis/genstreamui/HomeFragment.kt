@@ -5,10 +5,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.google.android.material.tabs.TabLayout
-import com.google.android.material.tabs.TabLayoutMediator
+import android.graphics.Typeface
+import androidx.core.content.ContextCompat
 import android.content.Intent
 import androidx.core.view.GravityCompat
+import androidx.activity.OnBackPressedCallback
 import network.ermis.genstreamui.databinding.FragmentHomeBinding
 import network.ermis.genstreamui.device.DeviceActivity
 import network.ermis.genstreamui.setting.SettingActivity
@@ -46,7 +47,38 @@ class HomeFragment : Fragment() {
 
         binding.btnMenu.setOnClickListener {
             binding.drawerLayout.openDrawer(GravityCompat.START)
+            binding.sideMenu.menuItemHome.isFocusableInTouchMode = true
+            binding.sideMenu.menuItemHome.requestFocus()
         }
+
+        binding.sideMenu.menuItemHome.setOnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus) {
+                v.isFocusableInTouchMode = false
+            }
+        }
+
+        val onBackPressedCallback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                    binding.drawerLayout.closeDrawer(GravityCompat.START)
+                } else {
+                    isEnabled = false
+                    requireActivity().onBackPressedDispatcher.onBackPressed()
+                    isEnabled = true
+                }
+            }
+        }
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, onBackPressedCallback)
+
+        binding.drawerLayout.addDrawerListener(object : androidx.drawerlayout.widget.DrawerLayout.SimpleDrawerListener() {
+            override fun onDrawerOpened(drawerView: View) {
+                binding.sideMenu.menuItemHome.requestFocus()
+            }
+
+            override fun onDrawerClosed(drawerView: View) {
+                binding.btnMenu.requestFocus()
+            }
+        })
 
         binding.sideMenu.layoutUserProfile.setOnClickListener {
             val intent = Intent(requireContext(), UserProfileActivity::class.java)
@@ -93,36 +125,55 @@ class HomeFragment : Fragment() {
         
         // Disable swipe to change tabs
         binding.viewPager.isUserInputEnabled = false
-        
+
+        binding.tabMine.setOnClickListener { selectTab(0) }
+        binding.tabDiscovery.setOnClickListener { selectTab(1) }
+        binding.tabFindGame.setOnClickListener { selectTab(2) }
+
         // Select Discovery as default tab (position 1)
-        binding.viewPager.setCurrentItem(1, false)
+        selectTab(1)
+    }
 
-        TabLayoutMediator(binding.tabLayout, binding.viewPager, true, false) { tab, position ->
-            when (position) {
-                0 -> tab.text = "Mine"
-                1 -> tab.text = "Discovery"
-                2 -> tab.text = "Find game"
+    private fun selectTab(position: Int) {
+        if (binding.viewPager.currentItem == position) {
+            scrollToTop(position)
+            return
+        }
+        
+        binding.viewPager.setCurrentItem(position, false)
+        scrollToTop(position)
+        
+        val colorPrimary = ContextCompat.getColor(requireContext(), R.color.text_primary)
+        val colorSecondary = ContextCompat.getColor(requireContext(), R.color.text_secondary)
+
+        // Reset all tabs
+        binding.tabMine.setTextColor(colorSecondary)
+        binding.tabMine.setTypeface(null, Typeface.NORMAL)
+        binding.tabDiscovery.setTextColor(colorSecondary)
+        binding.tabDiscovery.setTypeface(null, Typeface.NORMAL)
+        binding.tabFindGame.setTextColor(colorSecondary)
+        binding.tabFindGame.setTypeface(null, Typeface.NORMAL)
+
+        // Highlight selected tab
+        when (position) {
+            0 -> {
+                binding.tabMine.setTextColor(colorPrimary)
+                binding.tabMine.setTypeface(null, Typeface.BOLD)
             }
-        }.attach()
-
-        binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(tab: TabLayout.Tab?) {
-                scrollToTop(tab?.position)
+            1 -> {
+                binding.tabDiscovery.setTextColor(colorPrimary)
+                binding.tabDiscovery.setTypeface(null, Typeface.BOLD)
             }
-
-            override fun onTabUnselected(tab: TabLayout.Tab?) {}
-
-            override fun onTabReselected(tab: TabLayout.Tab?) {
-                scrollToTop(tab?.position)
+            2 -> {
+                binding.tabFindGame.setTextColor(colorPrimary)
+                binding.tabFindGame.setTypeface(null, Typeface.BOLD)
             }
+        }
+    }
 
-            private fun scrollToTop(position: Int?) {
-                position?.let {
-                    val fragment = childFragmentManager.findFragmentByTag("f$it")
-                    fragment?.view?.findViewById<androidx.core.widget.NestedScrollView>(R.id.scrollView)?.smoothScrollTo(0, 0)
-                }
-            }
-        })
+    private fun scrollToTop(position: Int) {
+        val fragment = childFragmentManager.findFragmentByTag("f$position")
+        fragment?.view?.findViewById<androidx.core.widget.NestedScrollView>(R.id.scrollView)?.smoothScrollTo(0, 0)
     }
 
     override fun onDestroyView() {

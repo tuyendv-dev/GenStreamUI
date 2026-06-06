@@ -8,9 +8,16 @@
 
     <ImageView
         android:id="@+id/ivStatusSearch"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
-        android:layout_marginEnd="16dp"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginEnd="8dp"
+        android:padding="8dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:nextFocusUp="@id/ivStatusSearch"
+        android:nextFocusRight="@id/ivStatusSearch"
+        android:nextFocusLeft="@id/tabFindGame"
+        android:background="@drawable/bg_view_selector"
         android:src="@drawable/ic_search"
         app:tint="@color/white" />
 
@@ -19,6 +26,7 @@
         android:layout_width="16dp"
         android:layout_height="16dp"
         android:layout_marginEnd="16dp"
+        android:focusable="false"
         android:src="@drawable/ic_controller_game"
         app:tint="@color/white" />
 
@@ -27,6 +35,7 @@
         android:layout_width="16dp"
         android:layout_height="16dp"
         android:layout_marginEnd="16dp"
+        android:focusable="false"
         android:src="@drawable/ic_wifi"
         app:tint="@color/white" />
 
@@ -35,6 +44,7 @@
         android:layout_width="18dp"
         android:layout_height="18dp"
         android:layout_marginEnd="16dp"
+        android:focusable="false"
         android:src="@drawable/ic_battery"
         app:tint="@color/white" />
 
@@ -45,6 +55,7 @@
         android:text="10:16"
         android:textColor="@color/white"
         android:textSize="14sp"
+        android:focusable="false"
         android:textStyle="bold" />
 
 </LinearLayout>
