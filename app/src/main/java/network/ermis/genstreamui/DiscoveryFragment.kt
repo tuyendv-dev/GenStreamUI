@@ -68,6 +68,39 @@ class DiscoveryFragment : Fragment() {
         return binding.root
     }
 
+    private val strictRowFocusListener = View.OnKeyListener { v, keyCode, event ->
+        if (event.action == android.view.KeyEvent.ACTION_DOWN) {
+            if (keyCode == android.view.KeyEvent.KEYCODE_DPAD_LEFT || keyCode == android.view.KeyEvent.KEYCODE_DPAD_RIGHT) {
+                val direction = if (keyCode == android.view.KeyEvent.KEYCODE_DPAD_LEFT) View.FOCUS_LEFT else View.FOCUS_RIGHT
+                val nextFocus = android.view.FocusFinder.getInstance().findNextFocus(v.rootView as ViewGroup, v, direction)
+                if (nextFocus != null) {
+                    val currentRect = android.graphics.Rect()
+                    v.getGlobalVisibleRect(currentRect)
+                    val nextRect = android.graphics.Rect()
+                    nextFocus.getGlobalVisibleRect(nextRect)
+                    
+                    if (currentRect.bottom <= nextRect.top || currentRect.top >= nextRect.bottom) {
+                        return@OnKeyListener true
+                    }
+                } else {
+                    return@OnKeyListener true
+                }
+            }
+        }
+        false
+    }
+
+    private fun applyStrictRowFocus(view: View) {
+        if (view.isFocusable) {
+            view.setOnKeyListener(strictRowFocusListener)
+        }
+        if (view is ViewGroup) {
+            for (i in 0 until view.childCount) {
+                applyStrictRowFocus(view.getChildAt(i))
+            }
+        }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
@@ -75,6 +108,8 @@ class DiscoveryFragment : Fragment() {
         setupSideBanners()
         setupRecyclerViews()
         setupScrollEffect()
+        
+        applyStrictRowFocus(binding.bannerSection)
     }
 
     private fun setupBanners() {
@@ -194,6 +229,15 @@ class DiscoveryFragment : Fragment() {
 
         val fightingAdapter = GameAdapter(fightingGames)
         binding.rvFighting.adapter = fightingAdapter
+
+        val childAttachListener = object : androidx.recyclerview.widget.RecyclerView.OnChildAttachStateChangeListener {
+            override fun onChildViewAttachedToWindow(view: View) {
+                applyStrictRowFocus(view)
+            }
+            override fun onChildViewDetachedFromWindow(view: View) {}
+        }
+        binding.rvAdventure.addOnChildAttachStateChangeListener(childAttachListener)
+        binding.rvFighting.addOnChildAttachStateChangeListener(childAttachListener)
     }
 
     override fun onDestroyView() {
