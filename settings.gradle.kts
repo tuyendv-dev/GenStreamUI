@@ -21,4 +21,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "GenStreamUI"
 include(":app")
-include(":compose-app")

@@ -1,6 +1,0 @@
-<resources>
-    <!-- Base application theme. -->
-    <style name="Theme.GenStreamUI.Compose" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize theme colors if needed -->
-    </style>
-</resources>
