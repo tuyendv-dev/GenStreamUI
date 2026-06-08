@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
+        android:name=".application.GlobalApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -14,7 +15,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.GenStreamUI">
         <activity
-            android:name=".MainActivity"
+            android:name=".presentation.MainActivity"
             android:screenOrientation="sensorLandscape"
             android:exported="true">
             <intent-filter>
@@ -25,32 +26,32 @@
         </activity>
         
         <activity
-            android:name=".PlayGameActivity"
+            android:name=".presentation.PlayGameActivity"
             android:screenOrientation="sensorLandscape"
             android:exported="false" />
 
         <activity
-            android:name=".setting.SettingActivity"
+            android:name=".presentation.setting.SettingActivity"
             android:screenOrientation="sensorLandscape"
             android:exported="false" />
             
         <activity
-            android:name=".device.DeviceActivity"
+            android:name=".presentation.device.DeviceActivity"
             android:screenOrientation="sensorLandscape"
             android:exported="false" />
             
         <activity
-            android:name=".setting.UserProfileActivity"
+            android:name=".presentation.setting.UserProfileActivity"
             android:screenOrientation="sensorLandscape"
             android:exported="false" />
 
         <activity
-            android:name=".auth.LoginActivity"
+            android:name=".presentation.auth.LoginActivity"
             android:screenOrientation="sensorLandscape"
             android:exported="false" />
 
         <activity
-            android:name=".subscription.SubscriptionActivity"
+            android:name=".presentation.subscription.SubscriptionActivity"
             android:screenOrientation="sensorLandscape"
             android:exported="false" />
     </application>

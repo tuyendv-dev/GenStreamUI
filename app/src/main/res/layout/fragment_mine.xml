@@ -158,7 +158,7 @@
             android:layout_height="wrap_content">
 
             <!-- Scrollable Row of Tiles -->
-            <network.ermis.genstreamui.widget.FocusRetainingHorizontalScrollView
+            <network.ermis.genstreamui.presentation.widget.FocusRetainingHorizontalScrollView
                 android:id="@+id/horizontalScrollViewTiles"
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
@@ -178,7 +178,7 @@
                     android:orientation="horizontal"
                     android:clipToPadding="false"
                     android:clipChildren="false" />
-            </network.ermis.genstreamui.widget.FocusRetainingHorizontalScrollView>
+            </network.ermis.genstreamui.presentation.widget.FocusRetainingHorizontalScrollView>
 
             <!-- Description Details Panel -->
             <LinearLayout
