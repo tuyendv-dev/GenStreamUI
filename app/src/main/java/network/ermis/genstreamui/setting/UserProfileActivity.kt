@@ -15,6 +15,8 @@ import network.ermis.genstreamui.databinding.ActivityUserProfileBinding
 import network.ermis.genstreamui.databinding.DialogBindEmailBinding
 import network.ermis.genstreamui.databinding.DialogBindPhoneBinding
 import network.ermis.genstreamui.addScaleClickEffect
+import android.content.Intent
+import network.ermis.genstreamui.auth.LoginActivity
 
 class UserProfileActivity : AppCompatActivity() {
 
@@ -48,6 +50,9 @@ class UserProfileActivity : AppCompatActivity() {
         binding.btnLogout.addScaleClickEffect()
         binding.btnLogout.setOnClickListener {
             // Handle logout
+            val intent = Intent(this, LoginActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
             finish()
         }
 

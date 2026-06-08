@@ -45,6 +45,11 @@
             android:exported="false" />
 
         <activity
+            android:name=".auth.LoginActivity"
+            android:screenOrientation="sensorLandscape"
+            android:exported="false" />
+
+        <activity
             android:name=".subscription.SubscriptionActivity"
             android:screenOrientation="sensorLandscape"
             android:exported="false" />
