@@ -10,6 +10,8 @@ import network.ermis.genstreamui.common.UiState
 import network.ermis.genstreamui.common.base.BaseFragment
 import network.ermis.genstreamui.common.base.ext.collectWhenStarted
 import network.ermis.genstreamui.database.cache.SharedPrefCommon
+import network.ermis.genstreamui.database.cache.saveUser
+import network.ermis.genstreamui.domain.model.mapper.toDomain
 import network.ermis.genstreamui.databinding.FragmentVerificationBinding
 import network.ermis.genstreamui.presentation.MainActivity
 
@@ -60,7 +62,7 @@ class VerificationFragment :
                 is UiState.Success -> {
                     setLoading(false)
                     ui.data.data?.accessToken?.let { SharedPrefCommon.accessToken = it }
-                    ui.data.data?.user?.displayName?.let { SharedPrefCommon.userName = it }
+                    SharedPrefCommon.saveUser(ui.data.data?.user?.toDomain())
                     val message = ui.data.message ?: "Xác minh thành công"
                     Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
                     goToHome()

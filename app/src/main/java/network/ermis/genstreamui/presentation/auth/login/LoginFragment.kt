@@ -13,7 +13,10 @@ import network.ermis.genstreamui.common.UiState
 import network.ermis.genstreamui.common.base.BaseFragment
 import network.ermis.genstreamui.common.base.ext.collectWhenStarted
 import network.ermis.genstreamui.database.cache.SharedPrefCommon
+import network.ermis.genstreamui.database.cache.saveUser
 import network.ermis.genstreamui.databinding.FragmentLoginBinding
+import network.ermis.genstreamui.domain.model.dto.res.UserDTO
+import network.ermis.genstreamui.domain.model.mapper.toDomain
 import network.ermis.genstreamui.presentation.MainActivity
 import network.ermis.genstreamui.presentation.auth.forget.ForgetPasswordFragment
 
@@ -88,7 +91,7 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>(FragmentLoginBinding::i
                 UiState.Loading -> setLoading(true)
                 is UiState.Success -> {
                     setLoading(false)
-                    saveSession(ui.data.accessToken, ui.data.user?.displayName)
+                    saveSession(ui.data.accessToken, ui.data.user)
                     goToHome()
                 }
                 is UiState.Error -> {
@@ -105,7 +108,7 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>(FragmentLoginBinding::i
                 UiState.Loading -> showLoading()
                 is UiState.Success -> {
                     hideLoading()
-                    saveSession(ui.data.data?.accessToken, ui.data.data?.user?.displayName)
+                    saveSession(ui.data.data?.accessToken, ui.data.data?.user)
                     goToHome()
                 }
                 is UiState.Error -> {
@@ -116,9 +119,9 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>(FragmentLoginBinding::i
         }
     }
 
-    private fun saveSession(accessToken: String?, displayName: String?) {
+    private fun saveSession(accessToken: String?, user: UserDTO?) {
         accessToken?.let { SharedPrefCommon.accessToken = it }
-        displayName?.let { SharedPrefCommon.userName = it }
+        SharedPrefCommon.saveUser(user?.toDomain())
     }
 
     private fun setLoading(loading: Boolean) {

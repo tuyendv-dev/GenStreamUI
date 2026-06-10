@@ -14,10 +14,13 @@ import androidx.core.content.ContextCompat
 import android.content.Intent
 import androidx.core.view.GravityCompat
 import androidx.activity.OnBackPressedCallback
+import com.bumptech.glide.Glide
+import network.ermis.genstreamui.database.cache.SharedPrefCommon
+import network.ermis.genstreamui.database.cache.cachedUser
 import network.ermis.genstreamui.databinding.FragmentHomeBinding
 import network.ermis.genstreamui.presentation.device.DeviceActivity
 import network.ermis.genstreamui.presentation.setting.SettingActivity
-import network.ermis.genstreamui.presentation.setting.UserProfileActivity
+import network.ermis.genstreamui.presentation.profile.UserProfileActivity
 import network.ermis.genstreamui.presentation.subscription.SubscriptionActivity
 
 @AndroidEntryPoint
@@ -107,6 +110,28 @@ class HomeFragment : Fragment() {
             val intent = Intent(requireContext(), SubscriptionActivity::class.java)
             startActivity(intent)
             binding.drawerLayout.closeDrawer(GravityCompat.START)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Cập nhật lại theo cache (đề phòng user vừa thay đổi thông tin ở màn Profile)
+        if (_binding != null) bindSidebarUser()
+    }
+
+    /** Đổ thông tin user đã cache vào side menu (avatar + tên hiển thị). */
+    private fun bindSidebarUser() {
+        val user = SharedPrefCommon.cachedUser()
+        if (user.displayName.isNotEmpty()) {
+            binding.sideMenu.tvSidebarUsername.text = user.displayName
+        }
+        if (user.avatarUrl.isNotEmpty()) {
+            Glide.with(this)
+                .load(user.avatarUrl)
+                .placeholder(R.drawable.ic_avatar_default)
+                .error(R.drawable.ic_avatar_default)
+                .circleCrop()
+                .into(binding.sideMenu.ivSidebarAvatar)
         }
     }
 

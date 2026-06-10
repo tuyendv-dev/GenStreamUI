@@ -60,4 +60,16 @@ object SharedPrefCommon {
     var userName: String
         get() = getValue("userName", "")
         set(value) = setValue("userName", value)
+
+    var userId: Int
+        get() = getValue("userId", 0)
+        set(value) = setValue("userId", value)
+
+    var userEmail: String
+        get() = getValue("userEmail", "")
+        set(value) = setValue("userEmail", value)
+
+    var userAvatarUrl: String
+        get() = getValue("userAvatarUrl", "")
+        set(value) = setValue("userAvatarUrl", value)
 }

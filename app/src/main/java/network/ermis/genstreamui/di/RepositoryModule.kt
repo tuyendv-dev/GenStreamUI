@@ -5,7 +5,9 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import network.ermis.genstreamui.database.network.repository.AuthRepositoryImpl
+import network.ermis.genstreamui.database.network.repository.UserRepositoryImpl
 import network.ermis.genstreamui.domain.repository.AuthRepository
+import network.ermis.genstreamui.domain.repository.UserRepository
 import javax.inject.Singleton
 
 /**
@@ -19,4 +21,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindAuthRepository(impl: AuthRepositoryImpl): AuthRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindUserRepository(impl: UserRepositoryImpl): UserRepository
 }

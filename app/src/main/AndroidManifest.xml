@@ -41,7 +41,7 @@
             android:exported="false" />
             
         <activity
-            android:name=".presentation.setting.UserProfileActivity"
+            android:name=".presentation.profile.UserProfileActivity"
             android:screenOrientation="sensorLandscape"
             android:exported="false" />
 

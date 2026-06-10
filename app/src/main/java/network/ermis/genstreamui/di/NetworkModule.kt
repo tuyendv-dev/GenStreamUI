@@ -6,7 +6,9 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import network.ermis.genstreamui.BuildConfig
 import network.ermis.genstreamui.database.network.factory.ResultWrapperCallAdapterFactory
+import network.ermis.genstreamui.database.network.interceptor.AuthInterceptor
 import network.ermis.genstreamui.database.network.service.AuthService
+import network.ermis.genstreamui.database.network.service.UserService
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -24,7 +26,12 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient = OkHttpClient.Builder().apply {
+    fun provideAuthInterceptor(): AuthInterceptor = AuthInterceptor()
+
+    @Provides
+    @Singleton
+    fun provideOkHttpClient(authInterceptor: AuthInterceptor): OkHttpClient = OkHttpClient.Builder().apply {
+        addInterceptor(authInterceptor)
         if (BuildConfig.DEBUG) {
             addInterceptor(
                 HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
@@ -50,4 +57,9 @@ object NetworkModule {
     @Singleton
     fun provideAuthService(retrofit: Retrofit): AuthService =
         retrofit.create(AuthService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideUserService(retrofit: Retrofit): UserService =
+        retrofit.create(UserService::class.java)
 }
