@@ -5,25 +5,25 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import network.ermis.genstreamui.common.UiState
 import network.ermis.genstreamui.database.network.factory.ResultWrapper
-import network.ermis.genstreamui.domain.model.dto.res.ResLoginDTO
+import network.ermis.genstreamui.domain.model.dto.req.ReqResendOtpDTO
+import network.ermis.genstreamui.domain.model.dto.res.ResResendOtp
 import network.ermis.genstreamui.domain.repository.AuthRepository
 import javax.inject.Inject
 
 /**
- * UseCase đăng nhập: map ResultWrapper -> UiState, phát Loading trước khi gọi mạng.
- * Pattern Flow của UiState port từ GenPlayAndroid (các UseCase trong domain/usecase).
+ * UseCase gửi lại mã OTP theo email. Port theo GenPlayAndroid.
  */
-class LoginUseCase @Inject constructor(
+class ResendOtpUseCase @Inject constructor(
     private val authRepository: AuthRepository
 ) {
-    operator fun invoke(email: String, password: String) = flow<UiState<ResLoginDTO>> {
+    operator fun invoke(email: String) = flow<UiState<ResResendOtp>> {
         emit(UiState.Loading)
         try {
-            when (val response = authRepository.loginByEmailAndPassword(email, password)) {
+            when (val response = authRepository.resendOtp(ReqResendOtpDTO(email = email))) {
                 is ResultWrapper.Success -> emit(UiState.Success(response.value))
                 is ResultWrapper.GenericError -> emit(
                     UiState.Error(
-                        message = response.message ?: "Đăng nhập thất bại",
+                        message = response.message ?: "Gửi lại mã thất bại",
                         code = response.code?.toString().orEmpty()
                     )
                 )

@@ -19,7 +19,9 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // Backend base URL
-        buildConfigField("String", "baseUrl", "\"https://backend-api.genplay.io\"")
+        buildConfigField("String", "baseUrl", "\"https://staging-api.genstream.io\"")
+        // OAuth Web Client ID cho Google Sign-In — TODO: thay bằng client id thật của ermis
+        buildConfigField("String", "serverClientId", "\"YOUR_GOOGLE_WEB_CLIENT_ID.apps.googleusercontent.com\"")
     }
 
     buildTypes {
@@ -73,6 +75,9 @@ dependencies {
     implementation(libs.androidx.fragment.ktx)
 
     // Room
+    // Google Sign-In
+    implementation(libs.play.services.auth)
+
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)

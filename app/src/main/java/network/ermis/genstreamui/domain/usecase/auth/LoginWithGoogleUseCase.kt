@@ -5,25 +5,26 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import network.ermis.genstreamui.common.UiState
 import network.ermis.genstreamui.database.network.factory.ResultWrapper
-import network.ermis.genstreamui.domain.model.dto.res.ResLoginDTO
+import network.ermis.genstreamui.domain.model.dto.req.ReqLoginGgDTO
+import network.ermis.genstreamui.domain.model.dto.res.ResGoogleLoginDTO
 import network.ermis.genstreamui.domain.repository.AuthRepository
 import javax.inject.Inject
 
 /**
- * UseCase đăng nhập: map ResultWrapper -> UiState, phát Loading trước khi gọi mạng.
- * Pattern Flow của UiState port từ GenPlayAndroid (các UseCase trong domain/usecase).
+ * UseCase đổi authorization code (OAuth + PKCE) lấy phiên đăng nhập từ backend.
+ * Phần lấy code từ Google nằm ở [LoginByGoogleUseCase].
  */
-class LoginUseCase @Inject constructor(
+class LoginWithGoogleUseCase @Inject constructor(
     private val authRepository: AuthRepository
 ) {
-    operator fun invoke(email: String, password: String) = flow<UiState<ResLoginDTO>> {
+    operator fun invoke(req: ReqLoginGgDTO) = flow<UiState<ResGoogleLoginDTO>> {
         emit(UiState.Loading)
         try {
-            when (val response = authRepository.loginByEmailAndPassword(email, password)) {
+            when (val response = authRepository.loginWithGoogle(req)) {
                 is ResultWrapper.Success -> emit(UiState.Success(response.value))
                 is ResultWrapper.GenericError -> emit(
                     UiState.Error(
-                        message = response.message ?: "Đăng nhập thất bại",
+                        message = response.message ?: "Đăng nhập Google thất bại",
                         code = response.code?.toString().orEmpty()
                     )
                 )

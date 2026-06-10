@@ -9,6 +9,8 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import network.ermis.genstreamui.R
 import network.ermis.genstreamui.databinding.FragmentWelcomeBinding
+import network.ermis.genstreamui.presentation.auth.login.LoginFragment
+import network.ermis.genstreamui.presentation.auth.register.SignUpFragment
 
 @AndroidEntryPoint
 class WelcomeFragment : Fragment() {
