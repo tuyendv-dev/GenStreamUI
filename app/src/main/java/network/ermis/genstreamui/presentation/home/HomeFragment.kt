@@ -1,27 +1,31 @@
-package network.ermis.genstreamui.presentation
+package network.ermis.genstreamui.presentation.home
 
-import dagger.hilt.android.AndroidEntryPoint
-
-import network.ermis.genstreamui.R
-
+import android.content.Intent
+import android.graphics.Typeface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
-import android.graphics.Typeface
-import androidx.core.content.ContextCompat
-import android.content.Intent
-import androidx.core.view.GravityCompat
 import androidx.activity.OnBackPressedCallback
+import androidx.core.content.ContextCompat
+import androidx.core.view.GravityCompat
+import androidx.core.widget.NestedScrollView
+import androidx.drawerlayout.widget.DrawerLayout
+import androidx.fragment.app.Fragment
+import dagger.hilt.android.AndroidEntryPoint
+import network.ermis.genstreamui.R
 import network.ermis.genstreamui.common.base.ext.loadAvatar
 import network.ermis.genstreamui.database.cache.SharedPrefCommon
 import network.ermis.genstreamui.database.cache.cachedUser
 import network.ermis.genstreamui.databinding.FragmentHomeBinding
+import network.ermis.genstreamui.presentation.addScaleClickEffect
 import network.ermis.genstreamui.presentation.device.DeviceActivity
-import network.ermis.genstreamui.presentation.setting.SettingActivity
 import network.ermis.genstreamui.presentation.profile.UserProfileActivity
+import network.ermis.genstreamui.presentation.setting.SettingActivity
 import network.ermis.genstreamui.presentation.subscription.SubscriptionActivity
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @AndroidEntryPoint
 class HomeFragment : Fragment() {
@@ -39,7 +43,7 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        
+
         setupViewPager()
         updateTime()
 
@@ -78,7 +82,7 @@ class HomeFragment : Fragment() {
         }
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, onBackPressedCallback)
 
-        binding.drawerLayout.addDrawerListener(object : androidx.drawerlayout.widget.DrawerLayout.SimpleDrawerListener() {
+        binding.drawerLayout.addDrawerListener(object : DrawerLayout.SimpleDrawerListener() {
             override fun onDrawerOpened(drawerView: View) {
                 binding.sideMenu.menuItemHome.requestFocus()
             }
@@ -99,7 +103,7 @@ class HomeFragment : Fragment() {
             startActivity(intent)
             binding.drawerLayout.closeDrawer(GravityCompat.START)
         }
-        
+
         binding.sideMenu.menuItemDevice.setOnClickListener {
             val intent = Intent(requireContext(), DeviceActivity::class.java)
             startActivity(intent)
@@ -129,13 +133,13 @@ class HomeFragment : Fragment() {
     }
 
     private fun updateTime() {
-        val sdf = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
-        binding.statusIcons.tvStatusTime.text = sdf.format(java.util.Date())
-        
+        val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
+        binding.statusIcons.tvStatusTime.text = sdf.format(Date())
+
         binding.statusIcons.tvStatusTime.postDelayed(object : Runnable {
             override fun run() {
                 _binding?.let {
-                    it.statusIcons.tvStatusTime.text = sdf.format(java.util.Date())
+                    it.statusIcons.tvStatusTime.text = sdf.format(Date())
                     it.statusIcons.tvStatusTime.postDelayed(this, 60000)
                 }
             }
@@ -145,7 +149,7 @@ class HomeFragment : Fragment() {
     private fun setupViewPager() {
         val adapter = HomePagerAdapter(this)
         binding.viewPager.adapter = adapter
-        
+
         // Disable swipe to change tabs
         binding.viewPager.isUserInputEnabled = false
 
@@ -162,10 +166,10 @@ class HomeFragment : Fragment() {
             scrollToTop(position)
             return
         }
-        
+
         binding.viewPager.setCurrentItem(position, false)
         scrollToTop(position)
-        
+
         val colorPrimary = ContextCompat.getColor(requireContext(), R.color.text_primary)
         val colorSecondary = ContextCompat.getColor(requireContext(), R.color.text_secondary)
 
@@ -196,7 +200,7 @@ class HomeFragment : Fragment() {
 
     private fun scrollToTop(position: Int) {
         val fragment = childFragmentManager.findFragmentByTag("f$position")
-        fragment?.view?.findViewById<androidx.core.widget.NestedScrollView>(R.id.scrollView)?.smoothScrollTo(0, 0)
+        fragment?.view?.findViewById<NestedScrollView>(R.id.scrollView)?.smoothScrollTo(0, 0)
     }
 
     override fun onDestroyView() {

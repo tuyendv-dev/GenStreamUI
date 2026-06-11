@@ -1,12 +1,12 @@
-package network.ermis.genstreamui.presentation
+package network.ermis.genstreamui.presentation.home.discovery
 
-import dagger.hilt.android.AndroidEntryPoint
-
-import network.ermis.genstreamui.R
-
+import android.content.Intent
+import android.graphics.Rect
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.FocusFinder
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,8 +14,16 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
+import dagger.hilt.android.AndroidEntryPoint
+import network.ermis.genstreamui.R
 import network.ermis.genstreamui.databinding.FragmentDiscoveryBinding
+import network.ermis.genstreamui.presentation.home.GameModel
+import network.ermis.genstreamui.presentation.PlayGameActivity
+import network.ermis.genstreamui.presentation.addScaleClickEffect
+import network.ermis.genstreamui.presentation.home.BannerAdapter
+import network.ermis.genstreamui.presentation.home.GameAdapter
 
 @AndroidEntryPoint
 class DiscoveryFragment : Fragment() {
@@ -74,16 +82,16 @@ class DiscoveryFragment : Fragment() {
     }
 
     private val strictRowFocusListener = View.OnKeyListener { v, keyCode, event ->
-        if (event.action == android.view.KeyEvent.ACTION_DOWN) {
-            if (keyCode == android.view.KeyEvent.KEYCODE_DPAD_LEFT || keyCode == android.view.KeyEvent.KEYCODE_DPAD_RIGHT) {
-                val direction = if (keyCode == android.view.KeyEvent.KEYCODE_DPAD_LEFT) View.FOCUS_LEFT else View.FOCUS_RIGHT
-                val nextFocus = android.view.FocusFinder.getInstance().findNextFocus(v.rootView as ViewGroup, v, direction)
+        if (event.action == KeyEvent.ACTION_DOWN) {
+            if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT || keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
+                val direction = if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) View.FOCUS_LEFT else View.FOCUS_RIGHT
+                val nextFocus = FocusFinder.getInstance().findNextFocus(v.rootView as ViewGroup, v, direction)
                 if (nextFocus != null) {
-                    val currentRect = android.graphics.Rect()
+                    val currentRect = Rect()
                     v.getGlobalVisibleRect(currentRect)
-                    val nextRect = android.graphics.Rect()
+                    val nextRect = Rect()
                     nextFocus.getGlobalVisibleRect(nextRect)
-                    
+
                     if (currentRect.bottom <= nextRect.top || currentRect.top >= nextRect.bottom) {
                         return@OnKeyListener true
                     }
@@ -108,12 +116,12 @@ class DiscoveryFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        
+
         setupBanners()
         setupSideBanners()
         setupRecyclerViews()
         setupScrollEffect()
-        
+
         applyStrictRowFocus(binding.bannerSection)
     }
 
@@ -142,12 +150,12 @@ class DiscoveryFragment : Fragment() {
         })
         binding.cvTopSideBannerImage.addScaleClickEffect()
         binding.cvTopSideBannerImage.setOnClickListener {
-            val intent = android.content.Intent(requireContext(), PlayGameActivity::class.java)
+            val intent = Intent(requireContext(), PlayGameActivity::class.java)
             startActivity(intent)
         }
         binding.cvBottomSideBannerImage.addScaleClickEffect()
         binding.cvBottomSideBannerImage.setOnClickListener {
-            val intent = android.content.Intent(requireContext(), PlayGameActivity::class.java)
+            val intent = Intent(requireContext(), PlayGameActivity::class.java)
             startActivity(intent)
         }
     }
@@ -160,7 +168,7 @@ class DiscoveryFragment : Fragment() {
         sideCards.forEach { card ->
             card?.addScaleClickEffect()
             card?.setOnClickListener {
-                val intent = android.content.Intent(requireContext(), PlayGameActivity::class.java)
+                val intent = Intent(requireContext(), PlayGameActivity::class.java)
                 startActivity(intent)
             }
         }
@@ -172,7 +180,7 @@ class DiscoveryFragment : Fragment() {
             ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT
         )
         layoutParams.setMargins(4, 0, 4, 0)
-        
+
         binding.llIndicator.removeAllViews()
         for (i in indicators.indices) {
             indicators[i] = ImageView(requireContext())
@@ -183,7 +191,7 @@ class DiscoveryFragment : Fragment() {
             binding.llIndicator.addView(indicators[i])
         }
     }
-    
+
     private fun setCurrentIndicator(index: Int) {
         val childCount = binding.llIndicator.childCount
         for (i in 0 until childCount) {
@@ -212,21 +220,65 @@ class DiscoveryFragment : Fragment() {
 
     private fun setupRecyclerViews() {
         val adventureGames = listOf(
-            GameModel("The Witcher 3: Wild Hunt Hunt Hunt Hunt", "Slay monster/ Find Ciri. Sha da sd akjdnsd", R.drawable.image_4),
-            GameModel("The Witcher 3: Wild Hunt Hunt Hunt Hunt", "Slay monster/ Find Ciri. Sha da sd akjdnsd", R.drawable.image_2),
-            GameModel("The Witcher 3: Wild Hunt Hunt Hunt Hunt", "Slay monster/ Find Ciri. Sha da sd akjdnsd", R.drawable.image_11),
+            GameModel(
+                "The Witcher 3: Wild Hunt Hunt Hunt Hunt",
+                "Slay monster/ Find Ciri. Sha da sd akjdnsd",
+                R.drawable.image_4
+            ),
+            GameModel(
+                "The Witcher 3: Wild Hunt Hunt Hunt Hunt",
+                "Slay monster/ Find Ciri. Sha da sd akjdnsd",
+                R.drawable.image_2
+            ),
+            GameModel(
+                "The Witcher 3: Wild Hunt Hunt Hunt Hunt",
+                "Slay monster/ Find Ciri. Sha da sd akjdnsd",
+                R.drawable.image_11
+            ),
             GameModel("NieR: Automata", "Slay monster/ Game...", R.drawable.image_5)
         )
 
         val fightingGames = listOf(
-            GameModel("The Witcher 3: Wild Hunt Hunt Hunt Hunt", "Slay monster/ Find Ciri. Sha da sd akjdnsd", R.drawable.image_4),
-            GameModel("The Witcher 3: Wild Hunt Hunt Hunt Hunt", "Slay monster/ Find Ciri. Sha da sd akjdnsd", R.drawable.image_2),
-            GameModel("The Witcher 3: Wild Hunt Hunt Hunt Hunt", "Slay monster/ Find Ciri. Sha da sd akjdnsd", R.drawable.image_11),
-            GameModel("NieR: Automata", "Slay monster/ Find Ciri. Sha da sd akjdnsd", R.drawable.image_5),
-            GameModel("The Witcher 3: Wild Hunt Hunt Hunt Hunt", "Slay monster/ Find Ciri. Sha da sd akjdnsd", R.drawable.image_4),
-            GameModel("The Witcher 3: Wild Hunt Hunt Hunt Hunt", "Slay monster/ Find Ciri. Sha da sd akjdnsd", R.drawable.image_2),
-            GameModel("The Witcher 3: Wild Hunt Hunt Hunt Hunt", "Slay monster/ Find Ciri. Sha da sd akjdnsd", R.drawable.image_11),
-            GameModel("NieR: Automata", "Slay monster/ Find Ciri. Sha da sd akjdnsd", R.drawable.image_5)
+            GameModel(
+                "The Witcher 3: Wild Hunt Hunt Hunt Hunt",
+                "Slay monster/ Find Ciri. Sha da sd akjdnsd",
+                R.drawable.image_4
+            ),
+            GameModel(
+                "The Witcher 3: Wild Hunt Hunt Hunt Hunt",
+                "Slay monster/ Find Ciri. Sha da sd akjdnsd",
+                R.drawable.image_2
+            ),
+            GameModel(
+                "The Witcher 3: Wild Hunt Hunt Hunt Hunt",
+                "Slay monster/ Find Ciri. Sha da sd akjdnsd",
+                R.drawable.image_11
+            ),
+            GameModel(
+                "NieR: Automata",
+                "Slay monster/ Find Ciri. Sha da sd akjdnsd",
+                R.drawable.image_5
+            ),
+            GameModel(
+                "The Witcher 3: Wild Hunt Hunt Hunt Hunt",
+                "Slay monster/ Find Ciri. Sha da sd akjdnsd",
+                R.drawable.image_4
+            ),
+            GameModel(
+                "The Witcher 3: Wild Hunt Hunt Hunt Hunt",
+                "Slay monster/ Find Ciri. Sha da sd akjdnsd",
+                R.drawable.image_2
+            ),
+            GameModel(
+                "The Witcher 3: Wild Hunt Hunt Hunt Hunt",
+                "Slay monster/ Find Ciri. Sha da sd akjdnsd",
+                R.drawable.image_11
+            ),
+            GameModel(
+                "NieR: Automata",
+                "Slay monster/ Find Ciri. Sha da sd akjdnsd",
+                R.drawable.image_5
+            )
         )
 
         val adventureAdapter = GameAdapter(adventureGames)
@@ -235,7 +287,7 @@ class DiscoveryFragment : Fragment() {
         val fightingAdapter = GameAdapter(fightingGames)
         binding.rvFighting.adapter = fightingAdapter
 
-        val childAttachListener = object : androidx.recyclerview.widget.RecyclerView.OnChildAttachStateChangeListener {
+        val childAttachListener = object : RecyclerView.OnChildAttachStateChangeListener {
             override fun onChildViewAttachedToWindow(view: View) {
                 applyStrictRowFocus(view)
             }

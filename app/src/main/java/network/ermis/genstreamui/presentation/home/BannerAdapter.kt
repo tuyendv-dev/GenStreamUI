@@ -1,9 +1,11 @@
-package network.ermis.genstreamui.presentation
+package network.ermis.genstreamui.presentation.home
 
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import network.ermis.genstreamui.databinding.ItemBannerSlideBinding
+import network.ermis.genstreamui.presentation.PlayGameActivity
 
 class BannerAdapter(private val banners: List<GameModel>) : RecyclerView.Adapter<BannerAdapter.BannerViewHolder>() {
 
@@ -22,7 +24,7 @@ class BannerAdapter(private val banners: List<GameModel>) : RecyclerView.Adapter
 
         holder.binding.root.setOnClickListener {
             val context = holder.binding.root.context
-            val intent = android.content.Intent(context, PlayGameActivity::class.java)
+            val intent = Intent(context, PlayGameActivity::class.java)
             context.startActivity(intent)
         }
     }

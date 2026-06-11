@@ -1,4 +1,4 @@
-package network.ermis.genstreamui.presentation
+package network.ermis.genstreamui.presentation.home.mine
 
 data class MineTileItem(
     val id: Int,

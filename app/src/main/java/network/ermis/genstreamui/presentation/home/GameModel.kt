@@ -1,4 +1,4 @@
-package network.ermis.genstreamui.presentation
+package network.ermis.genstreamui.presentation.home
 
 data class GameModel(
     val title: String,

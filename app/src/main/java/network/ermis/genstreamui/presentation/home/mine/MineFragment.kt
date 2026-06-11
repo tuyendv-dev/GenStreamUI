@@ -1,21 +1,18 @@
-package network.ermis.genstreamui.presentation
+package network.ermis.genstreamui.presentation.home.mine
 
-import dagger.hilt.android.AndroidEntryPoint
-
-import network.ermis.genstreamui.R
-
-import android.content.res.ColorStateList
-import android.graphics.Color
-import android.graphics.drawable.GradientDrawable
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
 import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
 import android.animation.ValueAnimator
+import android.content.res.ColorStateList
+import android.graphics.Color
+import android.os.Bundle
+import android.view.KeyEvent
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import dagger.hilt.android.AndroidEntryPoint
+import network.ermis.genstreamui.R
 import network.ermis.genstreamui.databinding.FragmentMineBinding
 import network.ermis.genstreamui.databinding.ItemMineTileBinding
 
@@ -89,7 +86,7 @@ class MineFragment : Fragment() {
 
         for ((index, item) in tileItems.withIndex()) {
             val tileBinding = ItemMineTileBinding.inflate(layoutInflater, binding.linearLayoutTiles, false)
-            
+
             // Set initial unselected state
             tileBinding.cardView.scaleX = 1.0f
             tileBinding.cardView.scaleY = 1.0f
@@ -99,7 +96,7 @@ class MineFragment : Fragment() {
             // Bind data
             tileBinding.ivCardBackground.setImageResource(item.backgroundResId)
             tileBinding.ivCardIcon.setImageResource(item.iconResId)
-            
+
             if (item.tintColorString != null) {
                 tileBinding.ivCardIcon.imageTintList = ColorStateList.valueOf(Color.parseColor(item.tintColorString))
             } else {
@@ -121,7 +118,7 @@ class MineFragment : Fragment() {
             tileBinding.root.setOnClickListener {
                 selectCard(index, smoothScroll = true)
             }
-            
+
             tileBinding.root.isFocusable = true
             tileBinding.root.setOnFocusChangeListener { v, hasFocus ->
                 if (hasFocus) {
@@ -133,14 +130,14 @@ class MineFragment : Fragment() {
                     v.isFocusableInTouchMode = false
                 }
             }
-            
+
             tileBinding.root.setOnKeyListener { _, keyCode, event ->
-                if (event.action == android.view.KeyEvent.ACTION_DOWN) {
+                if (event.action == KeyEvent.ACTION_DOWN) {
                     when (keyCode) {
-                        android.view.KeyEvent.KEYCODE_DPAD_LEFT -> {
+                        KeyEvent.KEYCODE_DPAD_LEFT -> {
                             index == 0
                         }
-                        android.view.KeyEvent.KEYCODE_DPAD_RIGHT -> {
+                        KeyEvent.KEYCODE_DPAD_RIGHT -> {
                             index == tileItems.size - 1
                         }
                         else -> false
@@ -184,7 +181,7 @@ class MineFragment : Fragment() {
 
     private fun selectCard(position: Int, smoothScroll: Boolean = true) {
         if (position < 0 || position >= tileBindings.size) return
-        
+
         val targetView = tileBindings[position].root
         isProgrammaticScroll = true
         if (smoothScroll) {
@@ -209,7 +206,7 @@ class MineFragment : Fragment() {
         val newBinding = tileBindings[position]
         newBinding.cardView.animate().scaleX(1.4f).scaleY(1.4f).setDuration(250).start()
         newBinding.badgeEnter.visibility = View.VISIBLE
-        
+
         binding.horizontalScrollViewTiles.selectedChildView = newBinding.root
 
         // Đảm bảo item nhận được focus ngay cả trong Touch mode
