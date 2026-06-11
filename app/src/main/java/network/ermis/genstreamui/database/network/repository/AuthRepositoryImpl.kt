@@ -3,6 +3,7 @@ package network.ermis.genstreamui.database.network.repository
 import network.ermis.genstreamui.database.network.service.AuthService
 import network.ermis.genstreamui.domain.model.dto.req.ReqForgetPasswordDTO
 import network.ermis.genstreamui.domain.model.dto.req.ReqLoginGgDTO
+import network.ermis.genstreamui.domain.model.dto.req.ReqRefreshToken
 import network.ermis.genstreamui.domain.model.dto.req.ReqRegisterAccount
 import network.ermis.genstreamui.domain.model.dto.req.ReqResendOtpDTO
 import network.ermis.genstreamui.domain.model.dto.req.ReqResetPassword
@@ -37,4 +38,7 @@ class AuthRepositoryImpl @Inject constructor(
 
     override suspend fun resendOtp(req: ReqResendOtpDTO) =
         authService.resendOtp(req)
+
+    override suspend fun refreshToken(req: ReqRefreshToken) =
+        authService.refreshToken(req)
 }

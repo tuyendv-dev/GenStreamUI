@@ -24,3 +24,16 @@ fun SharedPrefCommon.cachedUser(): User = User(
     displayName = userName,
     avatarUrl = userAvatarUrl
 )
+
+/**
+ * Xoá toàn bộ phiên đăng nhập: token + thông tin user đã cache.
+ * Gọi khi đăng xuất hoặc khi refresh token thất bại.
+ */
+fun SharedPrefCommon.clearSession() {
+    accessToken = ""
+    refreshToken = ""
+    userId = 0
+    userName = ""
+    userEmail = ""
+    userAvatarUrl = ""
+}

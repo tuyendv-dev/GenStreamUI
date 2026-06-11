@@ -62,6 +62,7 @@ class VerificationFragment :
                 is UiState.Success -> {
                     setLoading(false)
                     ui.data.data?.accessToken?.let { SharedPrefCommon.accessToken = it }
+                    ui.data.data?.refreshToken?.let { SharedPrefCommon.refreshToken = it }
                     SharedPrefCommon.saveUser(ui.data.data?.user?.toDomain())
                     val message = ui.data.message ?: "Xác minh thành công"
                     Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()

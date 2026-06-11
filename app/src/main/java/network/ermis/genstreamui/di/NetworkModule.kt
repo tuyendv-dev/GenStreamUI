@@ -7,6 +7,7 @@ import dagger.hilt.components.SingletonComponent
 import network.ermis.genstreamui.BuildConfig
 import network.ermis.genstreamui.database.network.factory.ResultWrapperCallAdapterFactory
 import network.ermis.genstreamui.database.network.interceptor.AuthInterceptor
+import network.ermis.genstreamui.database.network.interceptor.TokenAuthenticator
 import network.ermis.genstreamui.database.network.service.AuthService
 import network.ermis.genstreamui.database.network.service.UserService
 import okhttp3.OkHttpClient
@@ -30,8 +31,12 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(authInterceptor: AuthInterceptor): OkHttpClient = OkHttpClient.Builder().apply {
+    fun provideOkHttpClient(
+        authInterceptor: AuthInterceptor,
+        tokenAuthenticator: TokenAuthenticator
+    ): OkHttpClient = OkHttpClient.Builder().apply {
         addInterceptor(authInterceptor)
+        authenticator(tokenAuthenticator)
         if (BuildConfig.DEBUG) {
             addInterceptor(
                 HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }

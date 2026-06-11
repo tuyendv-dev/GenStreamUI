@@ -57,6 +57,10 @@ object SharedPrefCommon {
         get() = getValue("accessToken", "")
         set(value) = setValue("accessToken", value)
 
+    var refreshToken: String
+        get() = getValue("refreshToken", "")
+        set(value) = setValue("refreshToken", value)
+
     var userName: String
         get() = getValue("userName", "")
         set(value) = setValue("userName", value)

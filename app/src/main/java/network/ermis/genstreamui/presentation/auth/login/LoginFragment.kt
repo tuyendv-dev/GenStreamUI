@@ -91,7 +91,7 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>(FragmentLoginBinding::i
                 UiState.Loading -> setLoading(true)
                 is UiState.Success -> {
                     setLoading(false)
-                    saveSession(ui.data.accessToken, ui.data.user)
+                    saveSession(ui.data.accessToken, ui.data.refreshToken, ui.data.user)
                     goToHome()
                 }
                 is UiState.Error -> {
@@ -108,7 +108,7 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>(FragmentLoginBinding::i
                 UiState.Loading -> showLoading()
                 is UiState.Success -> {
                     hideLoading()
-                    saveSession(ui.data.data?.accessToken, ui.data.data?.user)
+                    saveSession(ui.data.data?.accessToken, ui.data.data?.refreshToken, ui.data.data?.user)
                     goToHome()
                 }
                 is UiState.Error -> {
@@ -119,8 +119,9 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>(FragmentLoginBinding::i
         }
     }
 
-    private fun saveSession(accessToken: String?, user: UserDTO?) {
+    private fun saveSession(accessToken: String?, refreshToken: String?, user: UserDTO?) {
         accessToken?.let { SharedPrefCommon.accessToken = it }
+        refreshToken?.let { SharedPrefCommon.refreshToken = it }
         SharedPrefCommon.saveUser(user?.toDomain())
     }
 
