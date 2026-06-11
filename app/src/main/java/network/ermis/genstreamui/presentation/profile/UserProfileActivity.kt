@@ -15,11 +15,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import com.bumptech.glide.Glide
 import dagger.hilt.android.AndroidEntryPoint
 import network.ermis.genstreamui.R
 import network.ermis.genstreamui.common.UiState
 import network.ermis.genstreamui.common.base.ext.collectWhenStarted
+import network.ermis.genstreamui.common.base.ext.loadAvatar
 import network.ermis.genstreamui.database.cache.SharedPrefCommon
 import network.ermis.genstreamui.database.cache.cachedUser
 import network.ermis.genstreamui.database.cache.clearSession
@@ -123,14 +123,7 @@ class UserProfileActivity : AppCompatActivity() {
     private fun bindUser(user: User) {
         if (user.displayName.isNotEmpty()) binding.tvName.text = user.displayName
         if (user.id != 0) binding.tvUid.text = getString(R.string.user_uid, user.id)
-        if (user.avatarUrl.isNotEmpty()) {
-            Glide.with(this)
-                .load(user.avatarUrl)
-                .placeholder(R.drawable.ic_avatar_default)
-                .error(R.drawable.ic_avatar_default)
-                .circleCrop()
-                .into(binding.ivAvatar)
-        }
+        binding.ivAvatar.loadAvatar(user.avatarUrl)
         bindEmailRow(user.email)
     }
 

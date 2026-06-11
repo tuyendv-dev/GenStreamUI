@@ -14,7 +14,7 @@ import androidx.core.content.ContextCompat
 import android.content.Intent
 import androidx.core.view.GravityCompat
 import androidx.activity.OnBackPressedCallback
-import com.bumptech.glide.Glide
+import network.ermis.genstreamui.common.base.ext.loadAvatar
 import network.ermis.genstreamui.database.cache.SharedPrefCommon
 import network.ermis.genstreamui.database.cache.cachedUser
 import network.ermis.genstreamui.databinding.FragmentHomeBinding
@@ -125,14 +125,7 @@ class HomeFragment : Fragment() {
         if (user.displayName.isNotEmpty()) {
             binding.sideMenu.tvSidebarUsername.text = user.displayName
         }
-        if (user.avatarUrl.isNotEmpty()) {
-            Glide.with(this)
-                .load(user.avatarUrl)
-                .placeholder(R.drawable.ic_avatar_default)
-                .error(R.drawable.ic_avatar_default)
-                .circleCrop()
-                .into(binding.sideMenu.ivSidebarAvatar)
-        }
+        binding.sideMenu.ivSidebarAvatar.loadAvatar(user.avatarUrl)
     }
 
     private fun updateTime() {
