@@ -24,3 +24,22 @@ fun ImageView.loadAvatar(url: String?) {
         .circleCrop()
         .into(this)
 }
+
+/**
+ * Load ảnh cover game (banner / card) từ [url] qua Glide — centerCrop, không bo tròn.
+ * Dùng cho màn Discovery: ảnh từ Steam CDN (header_image / main_capsule).
+ * [DiskCacheStrategy.ALL] cache cả ảnh gốc lẫn ảnh decode nên lần sau hiển thị lại ngay.
+ */
+fun ImageView.loadCover(url: String?) {
+    if (url.isNullOrEmpty()) {
+        setImageResource(R.drawable.bg_image_placeholder)
+        return
+    }
+    Glide.with(this)
+        .load(url)
+        .diskCacheStrategy(DiskCacheStrategy.ALL)
+        .placeholder(R.drawable.bg_image_placeholder)
+        .error(R.drawable.bg_image_placeholder)
+        .centerCrop()
+        .into(this)
+}

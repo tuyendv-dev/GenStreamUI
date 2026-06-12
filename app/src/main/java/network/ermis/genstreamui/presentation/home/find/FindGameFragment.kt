@@ -1,67 +1,146 @@
 package network.ermis.genstreamui.presentation.home.find
 
 import android.content.Intent
-import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.view.LayoutInflater
+import android.util.Log
 import android.view.View
-import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
-import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import dagger.hilt.android.AndroidEntryPoint
 import network.ermis.genstreamui.R
+import network.ermis.genstreamui.common.UiState
+import network.ermis.genstreamui.common.base.BaseFragment
+import network.ermis.genstreamui.common.base.ext.collectWhenStarted
+import network.ermis.genstreamui.common.base.ext.loadCover
 import network.ermis.genstreamui.databinding.FragmentFindGameBinding
-import network.ermis.genstreamui.presentation.home.GameModel
+import network.ermis.genstreamui.domain.model.Discovery
+import network.ermis.genstreamui.domain.model.Game
 import network.ermis.genstreamui.presentation.PlayGameActivity
 import network.ermis.genstreamui.presentation.addScaleClickEffect
-import network.ermis.genstreamui.presentation.home.GameAdapter
+import network.ermis.genstreamui.presentation.home.discovery.DiscoverySectionAdapter
 
 @AndroidEntryPoint
-class FindGameFragment : Fragment() {
+class FindGameFragment :
+    BaseFragment<FragmentFindGameBinding>(FragmentFindGameBinding::inflate) {
 
-    private var _binding: FragmentFindGameBinding? = null
-    private val binding get() = _binding!!
+    private val TAG: String = "FindGameFragment"
+    private val viewModel: FindGameViewModel by viewModels()
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentFindGameBinding.inflate(inflater, container, false)
-        return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        setupRecyclerViews()
+    override fun initViews() {
         setupScrollEffect()
         setupCardClicks()
+
+        viewModel.loadStore(null)
+    }
+
+    override fun observerData() {
+        collectWhenStarted(viewModel.events) { ui ->
+            when (ui) {
+                UiState.Idle -> Unit
+                UiState.Loading -> showLoading()
+                is UiState.Success -> {
+                    hideLoading()
+                    bindStore(ui.data)
+                }
+                is UiState.Error -> {
+                    hideLoading()
+                    Toast.makeText(requireContext(), ui.message, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    /** Bind dữ liệu browse: banner hero + 5 small banner (featured) + danh sách section động. */
+    private fun bindStore(store: Discovery) {
+        val hero = store.featured.firstOrNull()
+            ?: store.hot.firstOrNull()
+            ?: store.recommended.firstOrNull()
+            ?: store.sections.firstOrNull()?.games?.firstOrNull()
+        if (hero != null) {
+            bindBanner(hero)
+        }
+        bindSmallBanners(store.featured)
+        binding.rvSections.adapter = DiscoverySectionAdapter(store.sections) { openPlayGame() }
+    }
+
+    /** Index card small banner đang được chọn; -1 nếu chưa có. Dùng để phân biệt tap chọn vs tap mở. */
+    private var selectedBannerIndex = -1
+
+    /** Bind tối đa 5 card nhỏ trong hsvSmallBanners từ data.featured; card dư (thiếu data) thì ẩn. */
+    private fun bindSmallBanners(featured: List<Game>) {
+        val cards = listOf(binding.card1, binding.card2, binding.card3, binding.card4, binding.card5)
+        val images = listOf(
+            binding.ivCard1, binding.ivCard2, binding.ivCard3, binding.ivCard4, binding.ivCard5
+        )
+
+        selectedBannerIndex = -1
+
+        val visibleCount = featured.size.coerceAtMost(5)
+        val emptyWeight = 5f - visibleCount
+        (binding.spaceStart.layoutParams as android.widget.LinearLayout.LayoutParams).weight = emptyWeight / 2f
+        (binding.spaceEnd.layoutParams as android.widget.LinearLayout.LayoutParams).weight = emptyWeight / 2f
+
+        cards.forEachIndexed { index, card ->
+            val game = featured.getOrNull(index)
+            if (game == null) {
+                card.visibility = View.GONE
+            } else {
+                card.visibility = View.VISIBLE
+                images[index].loadCover(game.mainCapsule.ifBlank { game.headerImage })
+                // Tap lần đầu chỉ chọn card (đổi banner); chỉ tap vào card đang được chọn mới mở game.
+                card.setOnClickListener {
+                    if (selectedBannerIndex == index) {
+                        openPlayGame(game)
+                    } else {
+                        selectedBannerIndex = index
+                        bindBanner(game)
+                    }
+                }
+                // Chỉ coi focus = "đã chọn" khi đến từ D-pad/bàn phím (không phải touch mode).
+                // Touch: việc chọn/mở do click handler ở trên quản lý (tap đầu chọn, tap sau mở).
+                card.setOnFocusChangeListener { v, hasFocus ->
+                    if (hasFocus && !v.isInTouchMode) {
+                        selectedBannerIndex = index
+                        bindBanner(game)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun bindBanner(hero: Game) {
+        binding.tvBannerTitle.text = hero.title
+        binding.tvBannerDesc.text = hero.shortDescription.ifBlank { hero.tagline }
+        binding.ivBannerBg.loadCover(hero.mainCapsule.ifBlank { hero.headerImage })
+    }
+
+    /** Mở PlayGameActivity, kèm id/slug của [game] khi có (mỗi small banner mở đúng game của nó). */
+    private fun openPlayGame(game: Game? = null) {
+        val intent = Intent(requireContext(), PlayGameActivity::class.java).apply {
+            putExtra(PlayGameActivity.EXTRA_GAME_ID, game?.id ?: -1)
+            putExtra(PlayGameActivity.EXTRA_GAME_SLUG, game?.slug.orEmpty())
+        }
+        startActivity(intent)
     }
 
     private fun setupCardClicks() {
         val cards = listOf(binding.card1, binding.card2, binding.card3, binding.card4, binding.card5)
-        cards.forEach { card ->
-            card.addScaleClickEffect()
-            card.setOnClickListener {
-                val intent = Intent(requireContext(), PlayGameActivity::class.java)
-                startActivity(intent)
-            }
-        }
+        cards.forEach { card -> card.addScaleClickEffect() }
     }
 
     private var isFooterHidden = false
     private val scrollHandler = Handler(Looper.getMainLooper())
     private val showFooterRunnable = Runnable {
-        _binding?.let {
-            isFooterHidden = false
-            it.footer.animate()
-                .translationX(0f)
-                .alpha(1f)
-                .setDuration(500)
-                .start()
-        }
+        if (view == null) return@Runnable
+        isFooterHidden = false
+        binding.footer.animate()
+            .translationX(0f)
+            .alpha(1f)
+            .setDuration(500)
+            .start()
     }
 
     private fun setupScrollEffect() {
@@ -106,102 +185,14 @@ class FindGameFragment : Fragment() {
         }
     }
 
-    private fun setupRecyclerViews() {
-        val steamGames = listOf(
-            GameModel(
-                "The Witcher 3: Wild Hunt Hunt Hunt Hunt",
-                "Slay monster/ Find Ciri. Sha da sd akjdnsd",
-                R.drawable.image_11
-            ),
-            GameModel(
-                "The Witcher 3: Wild Hunt Hunt Hunt Hunt",
-                "Slay monster/ Find Ciri. Sha da sd akjdnsd",
-                R.drawable.image_3
-            ),
-            GameModel(
-                "The Witcher 3: Wild Hunt Hunt Hunt Hunt",
-                "Slay monster/ Find Ciri. Sha da sd akjdnsd",
-                R.drawable.image_4
-            ),
-            GameModel(
-                "NieR: Automata",
-                "Slay monster/ Find Ciri. Sha da sd akjdnsd",
-                R.drawable.image_5
-            ),
-            GameModel(
-                "The Witcher 3: Wild Hunt Hunt Hunt Hunt",
-                "Slay monster/ Find Ciri. Sha da sd akjdnsd",
-                R.drawable.image_11
-            ),
-            GameModel(
-                "The Witcher 3: Wild Hunt Hunt Hunt Hunt",
-                "Slay monster/ Find Ciri. Sha da sd akjdnsd",
-                R.drawable.image_3
-            ),
-            GameModel(
-                "The Witcher 3: Wild Hunt Hunt Hunt Hunt",
-                "Slay monster/ Find Ciri. Sha da sd akjdnsd",
-                R.drawable.image_4
-            ),
-            GameModel(
-                "NieR: Automata",
-                "Slay monster/ Find Ciri. Sha da sd akjdnsd",
-                R.drawable.image_5
-            )
-        )
-
-        val fightingGames = listOf(
-            GameModel(
-                "The Witcher 3: Wild Hunt Hunt Hunt Hunt",
-                "Slay monster/ Find Ciri. Sha da sd akjdnsd",
-                R.drawable.image_11
-            ),
-            GameModel(
-                "The Witcher 3: Wild Hunt Hunt Hunt Hunt",
-                "Slay monster/ Find Ciri. Sha da sd akjdnsd",
-                R.drawable.image_3
-            ),
-            GameModel(
-                "The Witcher 3: Wild Hunt Hunt Hunt Hunt",
-                "Slay monster/ Find Ciri. Sha da sd akjdnsd",
-                R.drawable.image_4
-            ),
-            GameModel(
-                "NieR: Automata",
-                "Slay monster/ Find Ciri. Sha da sd akjdnsd",
-                R.drawable.image_5
-            ),
-            GameModel(
-                "The Witcher 3: Wild Hunt Hunt Hunt Hunt",
-                "Slay monster/ Find Ciri. Sha da sd akjdnsd",
-                R.drawable.image_11
-            ),
-            GameModel(
-                "The Witcher 3: Wild Hunt Hunt Hunt Hunt",
-                "Slay monster/ Find Ciri. Sha da sd akjdnsd",
-                R.drawable.image_3
-            ),
-            GameModel(
-                "The Witcher 3: Wild Hunt Hunt Hunt Hunt",
-                "Slay monster/ Find Ciri. Sha da sd akjdnsd",
-                R.drawable.image_4
-            ),
-            GameModel(
-                "NieR: Automata",
-                "Slay monster/ Find Ciri. Sha da sd akjdnsd",
-                R.drawable.image_5
-            )
-        )
-
-        val steamAdapter = GameAdapter(steamGames)
-        binding.rvSteamShooter.adapter = steamAdapter
-
-        val fightingAdapter = GameAdapter(fightingGames)
-        binding.rvFighting.adapter = fightingAdapter
+    override fun onDestroyView() {
+        scrollHandler.removeCallbacks(showFooterRunnable)
+        super.onDestroyView()
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+    private companion object {
+        const val STORE_STEAM = "steam"
+        const val STORE_EPIC = "epic"
+        const val STORE_GOG = "gog"
     }
 }

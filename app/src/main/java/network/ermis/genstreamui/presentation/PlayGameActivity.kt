@@ -102,4 +102,12 @@ class PlayGameActivity : AppCompatActivity() {
         binding.root.setOnClickListener { hideCompatibilityBadge() }
         binding.ivGameArtwork.setOnClickListener { hideCompatibilityBadge() }
     }
+
+    companion object {
+        /** Game id (Int) của game được chọn; -1 nếu mở không gắn game cụ thể. */
+        const val EXTRA_GAME_ID = "extra_game_id"
+
+        /** Game slug của game được chọn; rỗng nếu mở không gắn game cụ thể. */
+        const val EXTRA_GAME_SLUG = "extra_game_slug"
+    }
 }

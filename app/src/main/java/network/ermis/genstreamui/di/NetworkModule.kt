@@ -9,6 +9,7 @@ import network.ermis.genstreamui.database.network.factory.ResultWrapperCallAdapt
 import network.ermis.genstreamui.database.network.interceptor.AuthInterceptor
 import network.ermis.genstreamui.database.network.interceptor.TokenAuthenticator
 import network.ermis.genstreamui.database.network.service.AuthService
+import network.ermis.genstreamui.database.network.service.GameService
 import network.ermis.genstreamui.database.network.service.UserService
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -67,4 +68,9 @@ object NetworkModule {
     @Singleton
     fun provideUserService(retrofit: Retrofit): UserService =
         retrofit.create(UserService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideGameService(retrofit: Retrofit): GameService =
+        retrofit.create(GameService::class.java)
 }

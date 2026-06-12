@@ -2,61 +2,61 @@ package network.ermis.genstreamui.presentation.home.discovery
 
 import android.content.Intent
 import android.graphics.Rect
-import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.FocusFinder
 import android.view.KeyEvent
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.RecyclerView
+import androidx.fragment.app.viewModels
 import androidx.viewpager2.widget.ViewPager2
 import dagger.hilt.android.AndroidEntryPoint
 import network.ermis.genstreamui.R
+import network.ermis.genstreamui.common.UiState
+import network.ermis.genstreamui.common.base.BaseFragment
+import network.ermis.genstreamui.common.base.ext.collectWhenStarted
+import network.ermis.genstreamui.common.base.ext.loadCover
 import network.ermis.genstreamui.databinding.FragmentDiscoveryBinding
-import network.ermis.genstreamui.presentation.home.GameModel
+import network.ermis.genstreamui.domain.model.Discovery
+import network.ermis.genstreamui.domain.model.Game
 import network.ermis.genstreamui.presentation.PlayGameActivity
 import network.ermis.genstreamui.presentation.addScaleClickEffect
-import network.ermis.genstreamui.presentation.home.BannerAdapter
-import network.ermis.genstreamui.presentation.home.GameAdapter
 
 @AndroidEntryPoint
-class DiscoveryFragment : Fragment() {
+class DiscoveryFragment :
+    BaseFragment<FragmentDiscoveryBinding>(FragmentDiscoveryBinding::inflate) {
 
-    private var _binding: FragmentDiscoveryBinding? = null
-    private val binding get() = _binding!!
+    private val viewModel: DiscoveryViewModel by viewModels()
 
     private val slideHandler = Handler(Looper.getMainLooper())
     private val slideRunnable = Runnable {
-        _binding?.let {
-            val vp = it.vpMainBanner
-            val adapter = vp.adapter
-            if (adapter != null && adapter.itemCount > 0) {
-                var nextItem = vp.currentItem + 1
-                if (nextItem >= adapter.itemCount) {
-                    nextItem = 0
-                }
-                vp.setCurrentItem(nextItem, true)
+        if (view == null) return@Runnable
+        val vp = binding.vpMainBanner
+        val adapter = vp.adapter
+        if (adapter != null && adapter.itemCount > 0) {
+            var nextItem = vp.currentItem + 1
+            if (nextItem >= adapter.itemCount) {
+                nextItem = 0
             }
+            vp.setCurrentItem(nextItem, true)
         }
     }
 
     private var isFooterHidden = false
     private val showFooterRunnable = Runnable {
-        _binding?.let {
-            isFooterHidden = false
-            it.footer.animate()
-                .translationX(0f)
-                .alpha(1f)
-                .setDuration(500)
-                .start()
-        }
+        if (view == null) return@Runnable
+        isFooterHidden = false
+        binding.footer.animate()
+            .translationX(0f)
+            .alpha(1f)
+            .setDuration(500)
+            .start()
     }
+
     private fun setupScrollEffect() {
         binding.scrollView.setOnScrollChangeListener { _, _, _, _, _ ->
             if (!isFooterHidden) {
@@ -71,14 +71,6 @@ class DiscoveryFragment : Fragment() {
             slideHandler.removeCallbacks(showFooterRunnable)
             slideHandler.postDelayed(showFooterRunnable, 500)
         }
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentDiscoveryBinding.inflate(inflater, container, false)
-        return binding.root
     }
 
     private val strictRowFocusListener = View.OnKeyListener { v, keyCode, event ->
@@ -114,64 +106,91 @@ class DiscoveryFragment : Fragment() {
         }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        setupBanners()
-        setupSideBanners()
-        setupRecyclerViews()
+    override fun initViews() {
+        setupSideBannerClicks()
         setupScrollEffect()
 
         applyStrictRowFocus(binding.bannerSection)
+
+        viewModel.loadDiscovery()
     }
 
-    private fun setupBanners() {
-        val banners = listOf(
-            GameModel("Atomic Heart", "Stream game Recomendation", R.drawable.image_1),
-            GameModel("The Witcher 3: Wild Hunt", "Stream game Recomendation", R.drawable.image_1),
-            GameModel("Call of Duty: Mobile", "Stream game Recomendation", R.drawable.image_1),
-            GameModel("Dead or Alive 6", "Stream game Recomendation", R.drawable.image_1),
-            GameModel("NieR: Automata", "Stream game Recomendation", R.drawable.image_1)
-        )
+    override fun observerData() {
+        collectWhenStarted(viewModel.events) { ui ->
+            when (ui) {
+                UiState.Idle -> Unit
+                UiState.Loading -> showLoading()
+                is UiState.Success -> {
+                    hideLoading()
+                    bindDiscovery(ui.data)
+                }
+                is UiState.Error -> {
+                    hideLoading()
+                    Toast.makeText(requireContext(), ui.message, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
 
-        val bannerAdapter = BannerAdapter(banners)
-        binding.vpMainBanner.adapter = bannerAdapter
+    /** Bind toàn bộ dữ liệu discovery vào carousel, 2 card phụ và danh sách section. */
+    private fun bindDiscovery(discovery: Discovery) {
+        bindMainBanner(discovery.featured)
+        bindSideBanners(discovery.featured)
+        bindSections(discovery)
+    }
 
-        setupIndicators(banners.size)
-        if (banners.isNotEmpty()) setCurrentIndicator(0)
+    private fun openPlayGame() {
+        startActivity(Intent(requireContext(), PlayGameActivity::class.java))
+    }
+
+    private fun bindMainBanner(featured: List<Game>) {
+        binding.vpMainBanner.adapter = DiscoveryBannerAdapter(featured) { openPlayGame() }
+
+        setupIndicators(featured.size)
+        if (featured.isNotEmpty()) setCurrentIndicator(0)
 
         binding.vpMainBanner.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
                 setCurrentIndicator(position)
                 slideHandler.removeCallbacks(slideRunnable)
-                slideHandler.postDelayed(slideRunnable, 2000)
+                slideHandler.postDelayed(slideRunnable, 4000)
             }
         })
-        binding.cvTopSideBannerImage.addScaleClickEffect()
-        binding.cvTopSideBannerImage.setOnClickListener {
-            val intent = Intent(requireContext(), PlayGameActivity::class.java)
-            startActivity(intent)
+    }
+
+    /**
+     * 2 card phụ bên phải: nếu featured có <= 3 item thì lấy 2 item cuối, ngược lại lấy [1], [2].
+     * Ảnh dùng header_image, title = title, desc = short_description (fallback tagline).
+     */
+    private fun bindSideBanners(featured: List<Game>) {
+        val sideGames = if (featured.size <= 3) {
+            featured.takeLast(2)
+        } else {
+            listOf(featured[1], featured[2])
         }
-        binding.cvBottomSideBannerImage.addScaleClickEffect()
-        binding.cvBottomSideBannerImage.setOnClickListener {
-            val intent = Intent(requireContext(), PlayGameActivity::class.java)
-            startActivity(intent)
+        sideGames.getOrNull(0)?.let {
+            binding.topSideBannerImage.loadCover(it.headerImage)
+            binding.tvTopBannerTitle.text = it.title
+            binding.tvTopBannerDesc.text = it.shortDescription.ifBlank { it.tagline }
+        }
+        sideGames.getOrNull(1)?.let {
+            binding.bottomSideBannerImage.loadCover(it.headerImage)
+            binding.tvBottomBannerTitle.text = it.title
+            binding.tvBottomBannerDesc.text = it.shortDescription.ifBlank { it.tagline }
         }
     }
 
-    private fun setupSideBanners() {
-        val topSideCard = binding.sideBanners.getChildAt(0)
-        val bottomSideCard = binding.sideBanners.getChildAt(1)
+    private fun bindSections(discovery: Discovery) {
+        binding.rvSections.adapter =
+            DiscoverySectionAdapter(discovery.sections) { openPlayGame() }
+    }
 
-        val sideCards = listOf(topSideCard, bottomSideCard)
-        sideCards.forEach { card ->
-            card?.addScaleClickEffect()
-            card?.setOnClickListener {
-                val intent = Intent(requireContext(), PlayGameActivity::class.java)
-                startActivity(intent)
-            }
-        }
+    private fun setupSideBannerClicks() {
+        binding.cvTopSideBannerImage.addScaleClickEffect()
+        binding.cvTopSideBannerImage.setOnClickListener { openPlayGame() }
+        binding.cvBottomSideBannerImage.addScaleClickEffect()
+        binding.cvBottomSideBannerImage.setOnClickListener { openPlayGame() }
     }
 
     private fun setupIndicators(count: Int) {
@@ -218,87 +237,9 @@ class DiscoveryFragment : Fragment() {
         slideHandler.removeCallbacks(slideRunnable)
     }
 
-    private fun setupRecyclerViews() {
-        val adventureGames = listOf(
-            GameModel(
-                "The Witcher 3: Wild Hunt Hunt Hunt Hunt",
-                "Slay monster/ Find Ciri. Sha da sd akjdnsd",
-                R.drawable.image_4
-            ),
-            GameModel(
-                "The Witcher 3: Wild Hunt Hunt Hunt Hunt",
-                "Slay monster/ Find Ciri. Sha da sd akjdnsd",
-                R.drawable.image_2
-            ),
-            GameModel(
-                "The Witcher 3: Wild Hunt Hunt Hunt Hunt",
-                "Slay monster/ Find Ciri. Sha da sd akjdnsd",
-                R.drawable.image_11
-            ),
-            GameModel("NieR: Automata", "Slay monster/ Game...", R.drawable.image_5)
-        )
-
-        val fightingGames = listOf(
-            GameModel(
-                "The Witcher 3: Wild Hunt Hunt Hunt Hunt",
-                "Slay monster/ Find Ciri. Sha da sd akjdnsd",
-                R.drawable.image_4
-            ),
-            GameModel(
-                "The Witcher 3: Wild Hunt Hunt Hunt Hunt",
-                "Slay monster/ Find Ciri. Sha da sd akjdnsd",
-                R.drawable.image_2
-            ),
-            GameModel(
-                "The Witcher 3: Wild Hunt Hunt Hunt Hunt",
-                "Slay monster/ Find Ciri. Sha da sd akjdnsd",
-                R.drawable.image_11
-            ),
-            GameModel(
-                "NieR: Automata",
-                "Slay monster/ Find Ciri. Sha da sd akjdnsd",
-                R.drawable.image_5
-            ),
-            GameModel(
-                "The Witcher 3: Wild Hunt Hunt Hunt Hunt",
-                "Slay monster/ Find Ciri. Sha da sd akjdnsd",
-                R.drawable.image_4
-            ),
-            GameModel(
-                "The Witcher 3: Wild Hunt Hunt Hunt Hunt",
-                "Slay monster/ Find Ciri. Sha da sd akjdnsd",
-                R.drawable.image_2
-            ),
-            GameModel(
-                "The Witcher 3: Wild Hunt Hunt Hunt Hunt",
-                "Slay monster/ Find Ciri. Sha da sd akjdnsd",
-                R.drawable.image_11
-            ),
-            GameModel(
-                "NieR: Automata",
-                "Slay monster/ Find Ciri. Sha da sd akjdnsd",
-                R.drawable.image_5
-            )
-        )
-
-        val adventureAdapter = GameAdapter(adventureGames)
-        binding.rvAdventure.adapter = adventureAdapter
-
-        val fightingAdapter = GameAdapter(fightingGames)
-        binding.rvFighting.adapter = fightingAdapter
-
-        val childAttachListener = object : RecyclerView.OnChildAttachStateChangeListener {
-            override fun onChildViewAttachedToWindow(view: View) {
-                applyStrictRowFocus(view)
-            }
-            override fun onChildViewDetachedFromWindow(view: View) {}
-        }
-        binding.rvAdventure.addOnChildAttachStateChangeListener(childAttachListener)
-        binding.rvFighting.addOnChildAttachStateChangeListener(childAttachListener)
-    }
-
     override fun onDestroyView() {
+        slideHandler.removeCallbacks(slideRunnable)
+        slideHandler.removeCallbacks(showFooterRunnable)
         super.onDestroyView()
-        _binding = null
     }
 }

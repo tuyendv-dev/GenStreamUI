@@ -11,25 +11,22 @@
         android:scaleType="centerCrop"
         android:src="@drawable/image_1" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:background="#66000000"
-        app:layout_constraintBottom_toBottomOf="parent" />
-
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:background="#66000000"
         android:orientation="vertical"
         android:padding="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
         <TextView
             android:id="@+id/tvBannerTitle"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
             android:text="Atomic Heart"
             android:textColor="@color/white"
             android:textSize="16sp"
@@ -37,12 +34,15 @@
 
         <TextView
             android:id="@+id/tvBannerDesc"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
+            android:ellipsize="end"
+            android:lines="3"
+            android:maxLines="3"
             android:text="Stream game Recomendation"
             android:textColor="@color/text_secondary"
-            android:textSize="13sp" />
+            android:textSize="14sp" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

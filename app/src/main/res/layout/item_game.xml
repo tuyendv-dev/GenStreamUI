@@ -94,19 +94,19 @@
                 android:layout_marginStart="8dp"
                 android:src="@drawable/ic_steam" />
 
-            <!--            <ImageView-->
-            <!--                android:layout_width="16dp"-->
-            <!--                android:layout_height="16dp"-->
-            <!--                android:layout_marginStart="8dp"-->
-            <!--                android:src="@drawable/ic_xbox"-->
-            <!--                app:tint="@color/text_secondary" />-->
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_marginStart="8dp"
+                android:src="@drawable/ic_xbox"
+                app:tint="@color/text_secondary" />
 
-            <!--            <ImageView-->
-            <!--                android:layout_width="16dp"-->
-            <!--                android:layout_height="16dp"-->
-            <!--                android:layout_marginStart="8dp"-->
-            <!--                android:src="@drawable/ic_epic"-->
-            <!--                app:tint="@color/text_secondary" />-->
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_marginStart="8dp"
+                android:src="@drawable/ic_epic"
+                app:tint="@color/text_secondary" />
 
         </LinearLayout>
 
