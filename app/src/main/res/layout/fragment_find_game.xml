@@ -11,7 +11,7 @@
         android:id="@+id/ivBannerBg"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:src="@drawable/image_banner"
+        android:src="@color/white"
         android:adjustViewBounds="true"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -43,7 +43,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="40dp"
-                android:text="Grand Theft Auto V"
+                tools:text="Grand Theft Auto V"
                 android:textColor="@color/white"
                 android:textSize="20sp"
                 android:textStyle="bold"
@@ -57,7 +57,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="40dp"
                 android:layout_marginTop="8dp"
-                android:text="&quot;Grand Theft Auto V&quot; has become one of the most popular and influential games globally since it release in 2013, thanks to its rich content and outstanding game quality"
+                tools:text="&quot;Grand Theft Auto V&quot; has become one of the most popular and influential games globally since it release in 2013, thanks to its rich content and outstanding game quality"
                 android:textColor="@color/text_primary"
                 android:textSize="13sp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -106,13 +106,18 @@
                     app:cardCornerRadius="12dp"
                     app:cardElevation="0dp">
 
-                    <ImageView
-                        android:id="@+id/ivCard1"
+                    <androidx.constraintlayout.widget.ConstraintLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:adjustViewBounds="true"
-                        android:scaleType="fitCenter"
-                        android:src="@drawable/image_2" />
+                        android:layout_height="wrap_content">
+
+                        <ImageView
+                            android:id="@+id/ivCard1"
+                            android:layout_width="match_parent"
+                            android:layout_height="0dp"
+                            android:scaleType="centerCrop"
+                            app:layout_constraintDimensionRatio="134:80"
+                            app:layout_constraintTop_toTopOf="parent" />
+                    </androidx.constraintlayout.widget.ConstraintLayout>
                 </androidx.cardview.widget.CardView>
 
                 <androidx.cardview.widget.CardView
@@ -127,13 +132,18 @@
                     app:cardCornerRadius="12dp"
                     app:cardElevation="0dp">
 
-                    <ImageView
-                        android:id="@+id/ivCard2"
+                    <androidx.constraintlayout.widget.ConstraintLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:adjustViewBounds="true"
-                        android:scaleType="fitCenter"
-                        android:src="@drawable/image_3" />
+                        android:layout_height="wrap_content">
+
+                        <ImageView
+                            android:id="@+id/ivCard2"
+                            android:layout_width="match_parent"
+                            android:layout_height="0dp"
+                            android:scaleType="centerCrop"
+                            app:layout_constraintDimensionRatio="134:80"
+                            app:layout_constraintTop_toTopOf="parent" />
+                    </androidx.constraintlayout.widget.ConstraintLayout>
                 </androidx.cardview.widget.CardView>
 
                 <androidx.cardview.widget.CardView
@@ -148,13 +158,18 @@
                     app:cardCornerRadius="12dp"
                     app:cardElevation="0dp">
 
-                    <ImageView
-                        android:id="@+id/ivCard3"
+                    <androidx.constraintlayout.widget.ConstraintLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:adjustViewBounds="true"
-                        android:scaleType="fitCenter"
-                        android:src="@drawable/image_4" />
+                        android:layout_height="wrap_content">
+
+                        <ImageView
+                            android:id="@+id/ivCard3"
+                            android:layout_width="match_parent"
+                            android:layout_height="0dp"
+                            android:scaleType="centerCrop"
+                            app:layout_constraintDimensionRatio="134:80"
+                            app:layout_constraintTop_toTopOf="parent" />
+                    </androidx.constraintlayout.widget.ConstraintLayout>
                 </androidx.cardview.widget.CardView>
 
                 <androidx.cardview.widget.CardView
@@ -169,13 +184,18 @@
                     app:cardCornerRadius="12dp"
                     app:cardElevation="0dp">
 
-                    <ImageView
-                        android:id="@+id/ivCard4"
+                    <androidx.constraintlayout.widget.ConstraintLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:adjustViewBounds="true"
-                        android:scaleType="fitCenter"
-                        android:src="@drawable/image_5" />
+                        android:layout_height="wrap_content">
+
+                        <ImageView
+                            android:id="@+id/ivCard4"
+                            android:layout_width="match_parent"
+                            android:layout_height="0dp"
+                            android:scaleType="centerCrop"
+                            app:layout_constraintDimensionRatio="134:80"
+                            app:layout_constraintTop_toTopOf="parent" />
+                    </androidx.constraintlayout.widget.ConstraintLayout>
                 </androidx.cardview.widget.CardView>
 
                 <androidx.cardview.widget.CardView
@@ -191,13 +211,18 @@
                     app:cardCornerRadius="12dp"
                     app:cardElevation="0dp">
 
-                    <ImageView
-                        android:id="@+id/ivCard5"
+                    <androidx.constraintlayout.widget.ConstraintLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:adjustViewBounds="true"
-                        android:scaleType="fitCenter"
-                        android:src="@drawable/image_11" />
+                        android:layout_height="wrap_content">
+
+                        <ImageView
+                            android:id="@+id/ivCard5"
+                            android:layout_width="match_parent"
+                            android:layout_height="0dp"
+                            android:scaleType="centerCrop"
+                            app:layout_constraintDimensionRatio="134:80"
+                            app:layout_constraintTop_toTopOf="parent" />
+                    </androidx.constraintlayout.widget.ConstraintLayout>
                 </androidx.cardview.widget.CardView>
 
                 <Space

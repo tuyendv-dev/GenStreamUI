@@ -3,7 +3,11 @@ package network.ermis.genstreamui.database.storage
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import network.ermis.genstreamui.database.storage.dao.DiscoveryRefDao
+import network.ermis.genstreamui.database.storage.dao.GameDao
 import network.ermis.genstreamui.database.storage.dao.RecentGameDao
+import network.ermis.genstreamui.domain.model.entities.DiscoveryRefEntity
+import network.ermis.genstreamui.domain.model.entities.GameEntity
 import network.ermis.genstreamui.domain.model.entities.RecentGameEntity
 
 /**
@@ -11,11 +15,13 @@ import network.ermis.genstreamui.domain.model.entities.RecentGameEntity
  * Bổ sung entity/DAO mới vào đây khi cần lưu trữ cục bộ.
  */
 @Database(
-    entities = [RecentGameEntity::class],
-    version = 1,
+    entities = [RecentGameEntity::class, GameEntity::class, DiscoveryRefEntity::class],
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun recentGameDao(): RecentGameDao
+    abstract fun gameDao(): GameDao
+    abstract fun discoveryRefDao(): DiscoveryRefDao
 }

@@ -104,8 +104,7 @@
                         android:id="@+id/topSideBannerImage"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:scaleType="centerCrop"
-                        android:src="@drawable/image_2" />
+                        android:scaleType="centerCrop"/>
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -121,7 +120,7 @@
                             android:layout_height="wrap_content"
                             android:ellipsize="end"
                             android:maxLines="1"
-                            android:text="Atomic Heart"
+                            tools:text="Atomic Heart"
                             android:textColor="@color/white"
                             android:textSize="14sp"
                             android:textStyle="bold" />
@@ -134,7 +133,7 @@
                             android:ellipsize="end"
                             android:lines="2"
                             android:maxLines="2"
-                            android:text="Stream game Recomendation"
+                            tools:text="Stream game Recomendation"
                             android:textColor="@color/text_secondary"
                             android:textSize="12sp" />
                     </LinearLayout>
@@ -158,8 +157,7 @@
                         android:id="@+id/bottomSideBannerImage"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:scaleType="centerCrop"
-                        android:src="@drawable/image_3" />
+                        android:scaleType="centerCrop" />
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -174,7 +172,7 @@
                             android:layout_height="wrap_content"
                             android:ellipsize="end"
                             android:maxLines="1"
-                            android:text="Atomic Heart"
+                            tools:text="Atomic Heart"
                             android:textColor="@color/white"
                             android:textSize="14sp"
                             android:textStyle="bold" />
@@ -187,7 +185,7 @@
                             android:ellipsize="end"
                             android:lines="2"
                             android:maxLines="2"
-                            android:text="Stream game Recomendation"
+                            tools:text="Stream game Recomendation"
                             android:textColor="@color/text_secondary"
                             android:textSize="12sp" />
                     </LinearLayout>

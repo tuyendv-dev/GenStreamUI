@@ -8,6 +8,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import network.ermis.genstreamui.database.storage.AppDatabase
+import network.ermis.genstreamui.database.storage.dao.DiscoveryRefDao
+import network.ermis.genstreamui.database.storage.dao.GameDao
 import network.ermis.genstreamui.database.storage.dao.RecentGameDao
 import javax.inject.Singleton
 
@@ -28,4 +30,12 @@ object StorageModule {
     @Provides
     @Singleton
     fun provideRecentGameDao(database: AppDatabase): RecentGameDao = database.recentGameDao()
+
+    @Provides
+    @Singleton
+    fun provideGameDao(database: AppDatabase): GameDao = database.gameDao()
+
+    @Provides
+    @Singleton
+    fun provideDiscoveryRefDao(database: AppDatabase): DiscoveryRefDao = database.discoveryRefDao()
 }
