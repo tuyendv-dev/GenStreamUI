@@ -17,6 +17,9 @@ import network.ermis.genstreamui.common.base.ext.loadCover
 import network.ermis.genstreamui.databinding.FragmentFindGameBinding
 import network.ermis.genstreamui.domain.model.Discovery
 import network.ermis.genstreamui.domain.model.Game
+import network.ermis.genstreamui.domain.model.extension.getGameBackground
+import network.ermis.genstreamui.domain.model.extension.getGameImage
+import network.ermis.genstreamui.domain.model.extension.getShortDescriptionExt
 import network.ermis.genstreamui.presentation.PlayGameActivity
 import network.ermis.genstreamui.presentation.addScaleClickEffect
 import network.ermis.genstreamui.presentation.home.adapter.SectionGameAdapter
@@ -88,7 +91,7 @@ class FindGameFragment :
                 card.visibility = View.GONE
             } else {
                 card.visibility = View.VISIBLE
-                images[index].loadCover(game.mainCapsule.ifBlank { game.headerImage })
+                images[index].loadCover(game.getGameImage())
                 // Tap lần đầu chỉ chọn card (đổi banner); chỉ tap vào card đang được chọn mới mở game.
                 card.setOnClickListener {
                     if (selectedBannerIndex == index) {
@@ -112,9 +115,8 @@ class FindGameFragment :
 
     private fun bindBanner(hero: Game) {
         binding.tvBannerTitle.text = hero.title
-        binding.tvBannerDesc.text = hero.shortDescription.ifBlank { hero.tagline }
-        binding.ivBannerBg.loadCover(hero.heroImage.ifBlank { hero.mainCapsule }
-            .ifBlank { hero.headerImage }.ifBlank { hero.coverImageUrl })
+        binding.tvBannerDesc.text = hero.getShortDescriptionExt()
+        binding.ivBannerBg.loadCover(hero.getGameBackground())
     }
 
     /** Mở PlayGameActivity, kèm id/slug của [game] khi có (mỗi small banner mở đúng game của nó). */

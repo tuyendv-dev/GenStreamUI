@@ -10,6 +10,8 @@ import androidx.recyclerview.widget.RecyclerView
 import network.ermis.genstreamui.common.base.ext.loadCover
 import network.ermis.genstreamui.databinding.ItemGameBinding
 import network.ermis.genstreamui.domain.model.Game
+import network.ermis.genstreamui.domain.model.extension.getGameImage
+import network.ermis.genstreamui.domain.model.extension.getShortDescriptionExt
 import network.ermis.genstreamui.presentation.addScaleClickEffect
 
 /**
@@ -33,9 +35,8 @@ class GameAdapter(
     override fun onBindViewHolder(holder: GameViewHolder, position: Int) {
         val game = games[position]
         holder.binding.tvGameTitle.text = game.title
-        holder.binding.tvGameDesc.text =
-            game.shortDescription.ifBlank { game.tagline }
-        holder.binding.ivGameCover.loadCover(game.mainCapsule.ifBlank { game.headerImage })
+        holder.binding.tvGameDesc.text = game.getShortDescriptionExt()
+        holder.binding.ivGameCover.loadCover(game.getGameImage())
 
         holder.binding.root.addScaleClickEffect()
         holder.binding.root.setOnClickListener { onClick(game) }

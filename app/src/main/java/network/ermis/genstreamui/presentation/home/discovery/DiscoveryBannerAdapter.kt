@@ -6,6 +6,8 @@ import androidx.recyclerview.widget.RecyclerView
 import network.ermis.genstreamui.common.base.ext.loadCover
 import network.ermis.genstreamui.databinding.ItemBannerSlideBinding
 import network.ermis.genstreamui.domain.model.Game
+import network.ermis.genstreamui.domain.model.extension.getGameBanner
+import network.ermis.genstreamui.domain.model.extension.getShortDescriptionExt
 
 /**
  * Adapter cho carousel banner lớn màn Discovery. Bind list [Game] (data.featured):
@@ -29,10 +31,8 @@ class DiscoveryBannerAdapter(
     override fun onBindViewHolder(holder: BannerViewHolder, position: Int) {
         val game = games[position]
         holder.binding.tvBannerTitle.text = game.title
-        holder.binding.tvBannerDesc.text =
-            game.tagline.ifBlank { game.shortDescription }
-        holder.binding.ivBannerImage.loadCover(game.heroImage.ifBlank { game.mainCapsule }
-            .ifBlank { game.headerImage }.ifBlank { game.coverImageUrl })
+        holder.binding.tvBannerDesc.text = game.getShortDescriptionExt()
+        holder.binding.ivBannerImage.loadCover(game.getGameBanner())
 
         holder.binding.root.setOnClickListener { onClick(game) }
     }

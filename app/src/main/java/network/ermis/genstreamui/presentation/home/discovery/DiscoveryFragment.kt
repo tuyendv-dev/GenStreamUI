@@ -23,6 +23,7 @@ import network.ermis.genstreamui.common.base.ext.loadCover
 import network.ermis.genstreamui.databinding.FragmentDiscoveryBinding
 import network.ermis.genstreamui.domain.model.Discovery
 import network.ermis.genstreamui.domain.model.Game
+import network.ermis.genstreamui.domain.model.extension.getShortDescriptionExt
 import network.ermis.genstreamui.presentation.PlayGameActivity
 import network.ermis.genstreamui.presentation.addScaleClickEffect
 import network.ermis.genstreamui.presentation.home.adapter.SectionGameAdapter
@@ -184,12 +185,12 @@ class DiscoveryFragment :
         topSideGame?.let {
             binding.topSideBannerImage.loadCover(it.headerImage)
             binding.tvTopBannerTitle.text = it.title
-            binding.tvTopBannerDesc.text = it.shortDescription.ifBlank { it.tagline }
+            binding.tvTopBannerDesc.text = it.getShortDescriptionExt()
         }
         bottomSideGame?.let {
             binding.bottomSideBannerImage.loadCover(it.headerImage)
             binding.tvBottomBannerTitle.text = it.title
-            binding.tvBottomBannerDesc.text = it.shortDescription.ifBlank { it.tagline }
+            binding.tvBottomBannerDesc.text = it.getShortDescriptionExt()
         }
     }
 

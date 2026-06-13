@@ -1,9 +1,6 @@
 package network.ermis.genstreamui.presentation
 
-import dagger.hilt.android.AndroidEntryPoint
-
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -14,11 +11,14 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import network.ermis.genstreamui.common.UiState
 import network.ermis.genstreamui.common.base.ext.loadCover
 import network.ermis.genstreamui.databinding.ActivityPlayGameBinding
 import network.ermis.genstreamui.domain.model.Game
+import network.ermis.genstreamui.domain.model.extension.getGameBackground
+import network.ermis.genstreamui.domain.model.extension.getShortDescriptionExt
 
 @AndroidEntryPoint
 class PlayGameActivity : AppCompatActivity() {
@@ -144,20 +144,9 @@ class PlayGameActivity : AppCompatActivity() {
     /** Bind dữ liệu game vào UI (title, mô tả, ảnh artwork). */
     private fun bindGame(game: Game) {
         binding.tvGameTitle.text = game.title
-        binding.tvGameDesc.text = game.shortDescription
-            .ifBlank { game.tagline }
-            .ifBlank { game.description }
+        binding.tvGameDesc.text = game.getShortDescriptionExt()
 
-        Log.e(TAG, "bindGame: game.heroImage=${game.heroImage}", )
-        Log.e(TAG, "bindGame: game.mainCapsule=${game.mainCapsule}", )
-        Log.e(TAG, "bindGame: game.headerImage=${game.headerImage}", )
-        Log.e(TAG, "bindGame: game.coverImageUrl=${game.coverImageUrl}", )
-        binding.ivGameArtwork.loadCover(
-            game.heroImage
-                .ifBlank { game.mainCapsule }
-                .ifBlank { game.headerImage }
-                .ifBlank { game.coverImageUrl }
-        ) { zoomOutArtwork() }
+        binding.ivGameArtwork.loadCover(game.getGameBackground()) { zoomOutArtwork() }
     }
 
     /** Chạy animation zoom-out cho artwork khi ảnh đã load xong (chỉ chạy 1 lần). */
