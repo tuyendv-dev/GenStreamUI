@@ -1,7 +1,11 @@
 package network.ermis.genstreamui.presentation.home
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Typeface
+import android.os.BatteryManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,6 +16,10 @@ import androidx.core.view.GravityCompat
 import androidx.core.widget.NestedScrollView
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.launch
 import dagger.hilt.android.AndroidEntryPoint
 import network.ermis.genstreamui.R
 import network.ermis.genstreamui.common.base.ext.loadAvatar
@@ -24,6 +32,7 @@ import network.ermis.genstreamui.presentation.home.adapter.HomePagerAdapter
 import network.ermis.genstreamui.presentation.profile.UserProfileActivity
 import network.ermis.genstreamui.presentation.setting.SettingActivity
 import network.ermis.genstreamui.presentation.subscription.SubscriptionActivity
+import network.ermis.genstreamui.presentation.widget.setupStatusIcons
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -33,6 +42,7 @@ class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -45,8 +55,12 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        setupStatusIcons(
+            binding = binding.statusIcons,
+            showSearch = true
+        )
+
         setupViewPager()
-        updateTime()
 
         // Add scale click effects
         binding.sideMenu.layoutUserProfile.addScaleClickEffect()
@@ -133,19 +147,7 @@ class HomeFragment : Fragment() {
         binding.sideMenu.ivSidebarAvatar.loadAvatar(user.avatarUrl)
     }
 
-    private fun updateTime() {
-        val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
-        binding.statusIcons.tvStatusTime.text = sdf.format(Date())
 
-        binding.statusIcons.tvStatusTime.postDelayed(object : Runnable {
-            override fun run() {
-                _binding?.let {
-                    it.statusIcons.tvStatusTime.text = sdf.format(Date())
-                    it.statusIcons.tvStatusTime.postDelayed(this, 60000)
-                }
-            }
-        }, 60000)
-    }
 
     private fun setupViewPager() {
         val adapter = HomePagerAdapter(this)

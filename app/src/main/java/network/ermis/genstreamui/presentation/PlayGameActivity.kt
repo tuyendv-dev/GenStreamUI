@@ -20,6 +20,8 @@ import network.ermis.genstreamui.domain.model.Game
 import network.ermis.genstreamui.domain.model.extension.getGameBackground
 import network.ermis.genstreamui.domain.model.extension.getShortDescriptionExt
 
+import network.ermis.genstreamui.presentation.widget.setupStatusIcons
+
 @AndroidEntryPoint
 class PlayGameActivity : AppCompatActivity() {
 
@@ -42,6 +44,13 @@ class PlayGameActivity : AppCompatActivity() {
         val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
         windowInsetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+
+        // Setup status icons
+        setupStatusIcons(
+            binding = binding.statusIcons,
+            showSearch = false,
+            showGamepad = false
+        )
 
         // Back navigation
         binding.btnBack.setOnClickListener {

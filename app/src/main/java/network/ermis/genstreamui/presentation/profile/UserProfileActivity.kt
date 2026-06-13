@@ -33,6 +33,8 @@ import network.ermis.genstreamui.domain.model.dto.req.ReqUpdateUserInfo
 import network.ermis.genstreamui.presentation.addScaleClickEffect
 import network.ermis.genstreamui.presentation.auth.LoginActivity
 
+import network.ermis.genstreamui.presentation.widget.setupStatusIcons
+
 @AndroidEntryPoint
 class UserProfileActivity : AppCompatActivity() {
 
@@ -49,6 +51,13 @@ class UserProfileActivity : AppCompatActivity() {
         val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
         windowInsetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+
+        // Setup status icons
+        setupStatusIcons(
+            binding = binding.statusIcons,
+            showSearch = false,
+            showGamepad = false
+        )
 
         binding.btnBack.setOnClickListener {
             finish()

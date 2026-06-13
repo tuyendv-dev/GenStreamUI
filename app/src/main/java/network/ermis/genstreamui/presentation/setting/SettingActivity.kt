@@ -15,6 +15,8 @@ import network.ermis.genstreamui.R
 import network.ermis.genstreamui.databinding.ActivitySettingBinding
 import android.view.KeyEvent
 
+import network.ermis.genstreamui.presentation.widget.setupStatusIcons
+
 @AndroidEntryPoint
 class SettingActivity : AppCompatActivity() {
 
@@ -32,6 +34,13 @@ class SettingActivity : AppCompatActivity() {
         val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
         windowInsetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+
+        // Setup status icons
+        setupStatusIcons(
+            binding = binding.statusIcons,
+            showSearch = false,
+            showGamepad = false
+        )
 
         categories = SettingManager.loadSettings(this)
 

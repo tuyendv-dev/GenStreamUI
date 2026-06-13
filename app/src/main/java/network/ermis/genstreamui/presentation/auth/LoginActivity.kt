@@ -11,6 +11,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import network.ermis.genstreamui.R
 import network.ermis.genstreamui.databinding.ActivityLoginBinding
 
+import network.ermis.genstreamui.presentation.widget.setupStatusIcons
+
 @AndroidEntryPoint
 class LoginActivity : AppCompatActivity() {
 
@@ -26,9 +28,12 @@ class LoginActivity : AppCompatActivity() {
         windowInsetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
 
-        // Hide unnecessary status icons
-        binding.statusIcons.ivStatusSearch.visibility = View.GONE
-        binding.statusIcons.ivStatusGamepad.visibility = View.GONE
+        // Setup status icons
+        setupStatusIcons(
+            binding = binding.statusIcons,
+            showSearch = false,
+            showGamepad = false
+        )
 
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
