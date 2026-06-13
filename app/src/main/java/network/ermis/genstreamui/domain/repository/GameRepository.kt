@@ -4,6 +4,7 @@ import network.ermis.genstreamui.database.network.factory.ResultWrapper
 import network.ermis.genstreamui.domain.model.Discovery
 import network.ermis.genstreamui.domain.model.Game
 import network.ermis.genstreamui.domain.model.dto.res.ResDiscovery
+import network.ermis.genstreamui.domain.model.dto.res.ResGameDetail
 
 /**
  * Repository interface tầng domain cho game. Song song với [AuthRepository] / [UserRepository].
@@ -31,4 +32,10 @@ interface GameRepository {
 
     /** Truy vấn thông tin một game từ kho game cục bộ chỉ bằng id. */
     suspend fun getGameById(id: Int): Game?
+
+    /** Lấy chi tiết một game từ API — GET /games/{id}. */
+    suspend fun getGameDetail(id: Int): ResultWrapper<ResGameDetail>
+
+    /** Upsert một game vào kho game cục bộ (ghi đè theo id). */
+    suspend fun saveGame(game: Game)
 }

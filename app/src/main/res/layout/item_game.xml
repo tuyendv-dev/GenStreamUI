@@ -78,6 +78,7 @@
             android:layout_marginTop="12dp"
             android:layout_marginBottom="8dp"
             android:orientation="horizontal"
+            android:gravity="center_vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvGameDesc">
@@ -98,15 +99,13 @@
                 android:layout_width="16dp"
                 android:layout_height="16dp"
                 android:layout_marginStart="8dp"
-                android:src="@drawable/ic_xbox"
-                app:tint="@color/text_secondary" />
+                android:src="@drawable/ic_xbox_game" />
 
             <ImageView
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:layout_marginStart="8dp"
-                android:src="@drawable/ic_epic"
-                app:tint="@color/text_secondary" />
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_marginStart="6dp"
+                android:src="@drawable/ic_epic_game"/>
 
         </LinearLayout>
 

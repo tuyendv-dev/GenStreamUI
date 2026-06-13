@@ -3,8 +3,10 @@ package network.ermis.genstreamui.database.network.service
 import network.ermis.genstreamui.database.cache.SharedPrefCommon
 import network.ermis.genstreamui.database.network.factory.ResultWrapper
 import network.ermis.genstreamui.domain.model.dto.res.ResDiscovery
+import network.ermis.genstreamui.domain.model.dto.res.ResGameDetail
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 /**
@@ -25,4 +27,12 @@ interface GameService {
         @Header("Accept") accept: String = "application/json",
         @Header("Accept-Language") language: String = SharedPrefCommon.languageCode.ifEmpty { "en" }
     ): ResultWrapper<ResDiscovery>
+
+    /** Chi tiết một game theo id. GET /games/{id}. */
+    @GET("/games/{id}")
+    suspend fun getGameDetail(
+        @Path("id") id: Int,
+        @Header("Accept") accept: String = "application/json",
+        @Header("Accept-Language") language: String = SharedPrefCommon.languageCode.ifEmpty { "en" }
+    ): ResultWrapper<ResGameDetail>
 }

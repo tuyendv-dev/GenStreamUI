@@ -52,6 +52,12 @@ class GameRepositoryImpl @Inject constructor(
     override suspend fun getGameById(id: Int): Game? =
         gameDao.getById(id)?.toDomain()
 
+    override suspend fun getGameDetail(id: Int) =
+        gameService.getGameDetail(id)
+
+    override suspend fun saveGame(game: Game) =
+        gameDao.upsertAll(listOf(game.toEntity()))
+
     // region cache key
 
     private fun lang(): String = SharedPrefCommon.languageCode.ifEmpty { "en" }

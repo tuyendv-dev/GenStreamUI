@@ -25,12 +25,17 @@ import network.ermis.genstreamui.domain.model.Discovery
 import network.ermis.genstreamui.domain.model.Game
 import network.ermis.genstreamui.presentation.PlayGameActivity
 import network.ermis.genstreamui.presentation.addScaleClickEffect
+import network.ermis.genstreamui.presentation.home.adapter.SectionGameAdapter
 
 @AndroidEntryPoint
 class DiscoveryFragment :
     BaseFragment<FragmentDiscoveryBinding>(FragmentDiscoveryBinding::inflate) {
 
     private val viewModel: DiscoveryViewModel by viewModels()
+
+    // Game đang gắn với 2 card phụ bên phải (set khi bind), để click mở đúng game.
+    private var topSideGame: Game? = null
+    private var bottomSideGame: Game? = null
 
     private val slideHandler = Handler(Looper.getMainLooper())
     private val slideRunnable = Runnable {
@@ -139,12 +144,17 @@ class DiscoveryFragment :
         bindSections(discovery)
     }
 
-    private fun openPlayGame() {
-        startActivity(Intent(requireContext(), PlayGameActivity::class.java))
+    /** Mở PlayGameActivity, kèm id/slug của [game] khi có (để màn Play load đúng game). */
+    private fun openPlayGame(game: Game? = null) {
+        val intent = Intent(requireContext(), PlayGameActivity::class.java).apply {
+            putExtra(PlayGameActivity.EXTRA_GAME_ID, game?.id ?: -1)
+            putExtra(PlayGameActivity.EXTRA_GAME_SLUG, game?.slug.orEmpty())
+        }
+        startActivity(intent)
     }
 
     private fun bindMainBanner(featured: List<Game>) {
-        binding.vpMainBanner.adapter = DiscoveryBannerAdapter(featured) { openPlayGame() }
+        binding.vpMainBanner.adapter = DiscoveryBannerAdapter(featured) { openPlayGame(it) }
 
         setupIndicators(featured.size)
         if (featured.isNotEmpty()) setCurrentIndicator(0)
@@ -169,12 +179,14 @@ class DiscoveryFragment :
         } else {
             listOf(featured[1], featured[2])
         }
-        sideGames.getOrNull(0)?.let {
+        topSideGame = sideGames.getOrNull(0)
+        bottomSideGame = sideGames.getOrNull(1)
+        topSideGame?.let {
             binding.topSideBannerImage.loadCover(it.headerImage)
             binding.tvTopBannerTitle.text = it.title
             binding.tvTopBannerDesc.text = it.shortDescription.ifBlank { it.tagline }
         }
-        sideGames.getOrNull(1)?.let {
+        bottomSideGame?.let {
             binding.bottomSideBannerImage.loadCover(it.headerImage)
             binding.tvBottomBannerTitle.text = it.title
             binding.tvBottomBannerDesc.text = it.shortDescription.ifBlank { it.tagline }
@@ -183,14 +195,14 @@ class DiscoveryFragment :
 
     private fun bindSections(discovery: Discovery) {
         binding.rvSections.adapter =
-            DiscoverySectionAdapter(discovery.sections) { openPlayGame() }
+            SectionGameAdapter(discovery.sections) { openPlayGame(it) }
     }
 
     private fun setupSideBannerClicks() {
         binding.cvTopSideBannerImage.addScaleClickEffect()
-        binding.cvTopSideBannerImage.setOnClickListener { openPlayGame() }
+        binding.cvTopSideBannerImage.setOnClickListener { openPlayGame(topSideGame) }
         binding.cvBottomSideBannerImage.addScaleClickEffect()
-        binding.cvBottomSideBannerImage.setOnClickListener { openPlayGame() }
+        binding.cvBottomSideBannerImage.setOnClickListener { openPlayGame(bottomSideGame) }
     }
 
     private fun setupIndicators(count: Int) {

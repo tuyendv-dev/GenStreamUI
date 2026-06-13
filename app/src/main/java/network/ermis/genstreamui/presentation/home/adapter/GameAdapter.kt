@@ -1,4 +1,4 @@
-package network.ermis.genstreamui.presentation.home.discovery
+package network.ermis.genstreamui.presentation.home.adapter
 
 import android.graphics.Rect
 import android.view.FocusFinder
@@ -13,14 +13,14 @@ import network.ermis.genstreamui.domain.model.Game
 import network.ermis.genstreamui.presentation.addScaleClickEffect
 
 /**
- * Adapter card game trong một hàng category màn Discovery. Bind list [Game]:
+ * Adapter card game trong một hàng category màn Discovery. Bind list [network.ermis.genstreamui.domain.model.Game]:
  * cover = main_capsule (fallback header_image), title = title, desc = short_description.
  * Cụm icon nền tảng để tĩnh trong layout (theo thiết kế). Giữ logic chặn focus DPAD cho TV.
  */
-class DiscoveryGameAdapter(
+class GameAdapter(
     private val games: List<Game>,
     private val onClick: (Game) -> Unit
-) : RecyclerView.Adapter<DiscoveryGameAdapter.GameViewHolder>() {
+) : RecyclerView.Adapter<GameAdapter.GameViewHolder>() {
 
     class GameViewHolder(val binding: ItemGameBinding) :
         RecyclerView.ViewHolder(binding.root)

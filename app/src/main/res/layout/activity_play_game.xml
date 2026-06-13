@@ -14,14 +14,14 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintWidth_percent="0.65">
+        app:layout_constraintWidth_percent="0.95">
 
         <ImageView
             android:id="@+id/ivGameArtwork"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="centerCrop"
-            android:src="@drawable/image_1" />
+            tools:src="@drawable/image_1" />
     </FrameLayout>
 
     <!-- Blending Gradient: Horizontal black-to-transparent overlay -->

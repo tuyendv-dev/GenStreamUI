@@ -1,4 +1,4 @@
-package network.ermis.genstreamui.presentation.home
+package network.ermis.genstreamui.presentation.home.adapter
 
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter

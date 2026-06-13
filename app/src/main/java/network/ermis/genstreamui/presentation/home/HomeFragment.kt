@@ -20,6 +20,7 @@ import network.ermis.genstreamui.database.cache.cachedUser
 import network.ermis.genstreamui.databinding.FragmentHomeBinding
 import network.ermis.genstreamui.presentation.addScaleClickEffect
 import network.ermis.genstreamui.presentation.device.DeviceActivity
+import network.ermis.genstreamui.presentation.home.adapter.HomePagerAdapter
 import network.ermis.genstreamui.presentation.profile.UserProfileActivity
 import network.ermis.genstreamui.presentation.setting.SettingActivity
 import network.ermis.genstreamui.presentation.subscription.SubscriptionActivity

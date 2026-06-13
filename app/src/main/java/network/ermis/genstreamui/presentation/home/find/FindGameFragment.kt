@@ -3,7 +3,6 @@ package network.ermis.genstreamui.presentation.home.find
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -20,7 +19,7 @@ import network.ermis.genstreamui.domain.model.Discovery
 import network.ermis.genstreamui.domain.model.Game
 import network.ermis.genstreamui.presentation.PlayGameActivity
 import network.ermis.genstreamui.presentation.addScaleClickEffect
-import network.ermis.genstreamui.presentation.home.discovery.DiscoverySectionAdapter
+import network.ermis.genstreamui.presentation.home.adapter.SectionGameAdapter
 
 @AndroidEntryPoint
 class FindGameFragment :
@@ -63,7 +62,7 @@ class FindGameFragment :
             bindBanner(hero)
         }
         bindSmallBanners(store.featured)
-        binding.rvSections.adapter = DiscoverySectionAdapter(store.sections) { openPlayGame() }
+        binding.rvSections.adapter = SectionGameAdapter(store.sections) { openPlayGame(it) }
     }
 
     /** Index card small banner đang được chọn; -1 nếu chưa có. Dùng để phân biệt tap chọn vs tap mở. */
@@ -114,7 +113,8 @@ class FindGameFragment :
     private fun bindBanner(hero: Game) {
         binding.tvBannerTitle.text = hero.title
         binding.tvBannerDesc.text = hero.shortDescription.ifBlank { hero.tagline }
-        binding.ivBannerBg.loadCover(hero.mainCapsule.ifBlank { hero.headerImage })
+        binding.ivBannerBg.loadCover(hero.heroImage.ifBlank { hero.mainCapsule }
+            .ifBlank { hero.headerImage }.ifBlank { hero.coverImageUrl })
     }
 
     /** Mở PlayGameActivity, kèm id/slug của [game] khi có (mỗi small banner mở đúng game của nó). */

@@ -11,7 +11,7 @@
         android:id="@+id/ivBannerBg"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:src="@color/white"
+        android:src="@color/bg_color"
         android:adjustViewBounds="true"
         app:layout_constraintTop_toTopOf="parent" />
 

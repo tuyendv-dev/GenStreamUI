@@ -1,8 +1,13 @@
 package network.ermis.genstreamui.common.base.ext
 
+import android.graphics.drawable.Drawable
 import android.widget.ImageView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import network.ermis.genstreamui.R
 
 /**
@@ -30,7 +35,7 @@ fun ImageView.loadAvatar(url: String?) {
  * Dùng cho màn Discovery: ảnh từ Steam CDN (header_image / main_capsule).
  * [DiskCacheStrategy.ALL] cache cả ảnh gốc lẫn ảnh decode nên lần sau hiển thị lại ngay.
  */
-fun ImageView.loadCover(url: String?) {
+fun ImageView.loadCover(url: String?, onReady: (() -> Unit)? = null) {
     if (url.isNullOrEmpty()) {
         setImageResource(R.drawable.bg_image_placeholder)
         return
@@ -41,5 +46,28 @@ fun ImageView.loadCover(url: String?) {
         .placeholder(R.drawable.bg_image_placeholder)
         .error(R.drawable.bg_image_placeholder)
         .centerCrop()
+        .apply {
+            if (onReady != null) {
+                listener(object : RequestListener<Drawable> {
+                    override fun onLoadFailed(
+                        e: GlideException?,
+                        model: Any?,
+                        target: Target<Drawable>,
+                        isFirstResource: Boolean
+                    ): Boolean = false
+
+                    override fun onResourceReady(
+                        resource: Drawable,
+                        model: Any,
+                        target: Target<Drawable>,
+                        dataSource: DataSource,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        onReady()
+                        return false
+                    }
+                })
+            }
+        }
         .into(this)
 }

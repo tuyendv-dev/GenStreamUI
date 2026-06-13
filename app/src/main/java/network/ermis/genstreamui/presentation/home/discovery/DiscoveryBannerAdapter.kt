@@ -31,7 +31,8 @@ class DiscoveryBannerAdapter(
         holder.binding.tvBannerTitle.text = game.title
         holder.binding.tvBannerDesc.text =
             game.tagline.ifBlank { game.shortDescription }
-        holder.binding.ivBannerImage.loadCover(game.headerImage)
+        holder.binding.ivBannerImage.loadCover(game.heroImage.ifBlank { game.mainCapsule }
+            .ifBlank { game.headerImage }.ifBlank { game.coverImageUrl })
 
         holder.binding.root.setOnClickListener { onClick(game) }
     }

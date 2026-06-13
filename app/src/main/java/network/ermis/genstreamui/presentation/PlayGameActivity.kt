@@ -3,17 +3,33 @@ package network.ermis.genstreamui.presentation
 import dagger.hilt.android.AndroidEntryPoint
 
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.launch
+import network.ermis.genstreamui.common.UiState
+import network.ermis.genstreamui.common.base.ext.loadCover
 import network.ermis.genstreamui.databinding.ActivityPlayGameBinding
+import network.ermis.genstreamui.domain.model.Game
 
 @AndroidEntryPoint
 class PlayGameActivity : AppCompatActivity() {
 
+    private val TAG: String = "PlayGameActivity"
     private lateinit var binding: ActivityPlayGameBinding
+
+    private val viewModel: PlayGameViewModel by viewModels()
+
+    // Đảm bảo animation zoom-out của artwork chỉ chạy 1 lần (bindGame có thể gọi 2 lần: cache + API).
+    private var artworkZoomed = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,14 +48,9 @@ class PlayGameActivity : AppCompatActivity() {
             finish()
         }
 
-        // Zoom out animation for artwork
+        // Pre-zoom artwork; animation zoom-out sẽ chạy khi ảnh load xong (xem bindGame).
         binding.ivGameArtwork.scaleX = 1.3f
         binding.ivGameArtwork.scaleY = 1.3f
-        binding.ivGameArtwork.animate()
-            .scaleX(1.0f)
-            .scaleY(1.0f)
-            .setDuration(1500)
-            .start()
 
         // Initial state for compatibility badge
         binding.btnCheckCompatibility.visibility = android.view.View.GONE
@@ -101,6 +112,63 @@ class PlayGameActivity : AppCompatActivity() {
         // Hide when clicking anywhere else
         binding.root.setOnClickListener { hideCompatibilityBadge() }
         binding.ivGameArtwork.setOnClickListener { hideCompatibilityBadge() }
+
+        observeGameDetail()
+
+        // gameId nhận từ màn khác gửi sang; chỉ load khi có id hợp lệ.
+        val gameId = intent.getIntExtra(EXTRA_GAME_ID, -1)
+        if (gameId > 0) {
+            viewModel.loadGameDetail(gameId)
+        }
+    }
+
+    /**
+     * Quan sát trạng thái chi tiết game: Success phát 2 lần — lần đầu là game đã cache trong
+     * Database (hiển thị ngay trước khi API xong), lần sau là data mới từ API (đã được ghi lại DB).
+     */
+    private fun observeGameDetail() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.events.collect { ui ->
+                    when (ui) {
+                        UiState.Idle, UiState.Loading -> Unit
+                        is UiState.Success -> bindGame(ui.data)
+                        is UiState.Error ->
+                            Toast.makeText(this@PlayGameActivity, ui.message, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+    }
+
+    /** Bind dữ liệu game vào UI (title, mô tả, ảnh artwork). */
+    private fun bindGame(game: Game) {
+        binding.tvGameTitle.text = game.title
+        binding.tvGameDesc.text = game.shortDescription
+            .ifBlank { game.tagline }
+            .ifBlank { game.description }
+
+        Log.e(TAG, "bindGame: game.heroImage=${game.heroImage}", )
+        Log.e(TAG, "bindGame: game.mainCapsule=${game.mainCapsule}", )
+        Log.e(TAG, "bindGame: game.headerImage=${game.headerImage}", )
+        Log.e(TAG, "bindGame: game.coverImageUrl=${game.coverImageUrl}", )
+        binding.ivGameArtwork.loadCover(
+            game.heroImage
+                .ifBlank { game.mainCapsule }
+                .ifBlank { game.headerImage }
+                .ifBlank { game.coverImageUrl }
+        ) { zoomOutArtwork() }
+    }
+
+    /** Chạy animation zoom-out cho artwork khi ảnh đã load xong (chỉ chạy 1 lần). */
+    private fun zoomOutArtwork() {
+        if (artworkZoomed) return
+        artworkZoomed = true
+        binding.ivGameArtwork.animate()
+            .scaleX(1.0f)
+            .scaleY(1.0f)
+            .setDuration(1500)
+            .start()
     }
 
     companion object {

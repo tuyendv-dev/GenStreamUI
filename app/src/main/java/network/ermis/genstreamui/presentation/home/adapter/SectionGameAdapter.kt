@@ -1,4 +1,4 @@
-package network.ermis.genstreamui.presentation.home.discovery
+package network.ermis.genstreamui.presentation.home.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -9,12 +9,12 @@ import network.ermis.genstreamui.domain.model.Game
 
 /**
  * Adapter danh sách section màn Discovery (data.sections). Mỗi item = 1 category:
- * tiêu đề = section.category, lưới game = section.games (GridLayoutManager 4 cột qua [DiscoveryGameAdapter]).
+ * tiêu đề = section.category, lưới game = section.games (GridLayoutManager 4 cột qua [GameAdapter]).
  */
-class DiscoverySectionAdapter(
+class SectionGameAdapter(
     private val sections: List<DiscoverySection>,
     private val onGameClick: (Game) -> Unit
-) : RecyclerView.Adapter<DiscoverySectionAdapter.SectionViewHolder>() {
+) : RecyclerView.Adapter<SectionGameAdapter.SectionViewHolder>() {
 
     class SectionViewHolder(val binding: ItemGameSectionBinding) :
         RecyclerView.ViewHolder(binding.root)
@@ -30,7 +30,7 @@ class DiscoverySectionAdapter(
         val section = sections[position]
         holder.binding.tvSectionTitle.text = section.category
         holder.binding.rvSectionGames.adapter =
-            DiscoveryGameAdapter(section.games, onGameClick)
+            GameAdapter(section.games, onGameClick)
     }
 
     override fun getItemCount() = sections.size
