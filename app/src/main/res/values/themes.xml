@@ -3,6 +3,9 @@
     <style name="Base.Theme.GenStreamUI" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <!-- Nền cửa sổ + nền splash màu tối để không bị flash trắng khi mở app. -->
+        <item name="android:windowBackground">@color/bg_color</item>
+        <item name="android:windowSplashScreenBackground" tools:targetApi="s">@color/bg_color</item>
     </style>
 
     <style name="Theme.GenStreamUI" parent="Base.Theme.GenStreamUI" />

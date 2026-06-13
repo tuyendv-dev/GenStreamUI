@@ -15,7 +15,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.GenStreamUI">
         <activity
-            android:name=".presentation.MainActivity"
+            android:name=".presentation.SplashActivity"
             android:screenOrientation="sensorLandscape"
             android:exported="true">
             <intent-filter>
@@ -24,7 +24,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        
+
+        <activity
+            android:name=".presentation.MainActivity"
+            android:screenOrientation="sensorLandscape"
+            android:exported="false" />
+
         <activity
             android:name=".presentation.PlayGameActivity"
             android:screenOrientation="sensorLandscape"

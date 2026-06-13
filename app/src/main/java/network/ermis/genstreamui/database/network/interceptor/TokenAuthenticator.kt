@@ -2,6 +2,7 @@ package network.ermis.genstreamui.database.network.interceptor
 
 import android.util.Log
 import kotlinx.coroutines.runBlocking
+import network.ermis.genstreamui.common.SessionManager
 import network.ermis.genstreamui.database.cache.SharedPrefCommon
 import network.ermis.genstreamui.database.cache.saveUser
 import network.ermis.genstreamui.database.network.factory.ResultWrapper
@@ -47,6 +48,9 @@ class TokenAuthenticator @Inject constructor(
         val currentRefreshToken = SharedPrefCommon.refreshToken
         if (currentRefreshToken.isEmpty()) {
             Log.w(TAG, "skip: refreshToken rỗng trong cache -> không thể refresh (cần đăng nhập lại)")
+            // Không có refresh token -> phiên hết hiệu lực -> báo về Login.
+            SharedPrefCommon.accessToken = ""
+            SessionManager.notifySessionExpired()
             return null
         }
 
@@ -69,10 +73,11 @@ class TokenAuthenticator @Inject constructor(
             val newAccessToken = session?.accessToken
 
             return if (newAccessToken.isNullOrEmpty()) {
-                // Refresh hỏng (refresh token cũng hết hạn) -> xoá phiên.
-                Log.w(TAG, "refresh thất bại -> xoá phiên, giữ 401")
+                // Refresh hỏng (refresh token cũng hết hạn) -> xoá phiên + báo về Login.
+                Log.w(TAG, "refresh thất bại -> xoá phiên, điều hướng Login")
                 SharedPrefCommon.accessToken = ""
                 SharedPrefCommon.refreshToken = ""
+                SessionManager.notifySessionExpired()
                 null
             } else {
                 Log.d(TAG, "refresh OK -> retry request với token mới")

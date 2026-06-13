@@ -20,8 +20,7 @@ fun Game.getGameBanner(): String =
 
 /** Ảnh nền (background) cho màn chi tiết/chơi game. */
 fun Game.getGameBackground(): String =
-    backgroundImage.ifBlank { heroImage }
-        .ifBlank { mainCapsule }
+    heroImage.ifBlank { mainCapsule }
         .ifBlank { headerImage }
         .ifBlank { coverImageUrl }
 
