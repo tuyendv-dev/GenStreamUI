@@ -1,6 +1,7 @@
 package network.ermis.genstreamui.domain.repository
 
 import network.ermis.genstreamui.database.network.factory.ResultWrapper
+import network.ermis.genstreamui.domain.model.dto.res.ResAgentToken
 import network.ermis.genstreamui.domain.model.dto.res.ResConnectionToken
 import network.ermis.genstreamui.domain.model.dto.res.ResEndSession
 import network.ermis.genstreamui.domain.model.dto.res.ResSession
@@ -26,4 +27,10 @@ interface SessionRepository {
 
     /** Kết thúc phiên [sessionId] — POST /sessions/{id}/end. */
     suspend fun endSession(sessionId: Int): ResultWrapper<ResEndSession>
+
+    /** Probe trạng thái phiên [sessionId] (không side-effect) — GET /sessions/{id}. */
+    suspend fun getSession(sessionId: Int): ResultWrapper<ResSession>
+
+    /** Lấy agent token cho phiên [sessionId] — POST /sessions/{id}/agent-token. */
+    suspend fun getAgentToken(sessionId: Int): ResultWrapper<ResAgentToken>
 }
