@@ -151,6 +151,10 @@ class FindGameFragment :
         // Initial state
         binding.llPlatform.setBackgroundColor(ColorUtils.setAlphaComponent(bgColor, 0))
 
+        binding.llPlatform.post {
+            binding.scrollView.topOffset = binding.llPlatform.height
+        }
+
         binding.scrollView.setOnScrollChangeListener { _, _, scrollY, _, _ ->
             // Assume 500px is the maximum scroll distance to completely fade out the banner
             val maxScrollBanner = 500f
