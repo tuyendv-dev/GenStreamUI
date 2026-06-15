@@ -79,6 +79,10 @@ dependencies {
     // Google Sign-In
     implementation(libs.play.services.auth)
 
+    // Crypto - BouncyCastle (sinh client cert PEM cho token-auth / mTLS)
+    implementation(libs.bouncycastle.bcpkix)
+    implementation(libs.bouncycastle.bcprov)
+
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)

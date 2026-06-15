@@ -20,6 +20,7 @@ lifecycle = "2.8.7"
 room = "2.6.1"
 fragmentKtx = "1.8.5"
 playServicesAuth = "21.2.0"
+bouncycastle = "1.78.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -64,6 +65,10 @@ androidx-room-compiler = { group = "androidx.room", name = "room-compiler", vers
 
 # Google Sign-In
 play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "playServicesAuth" }
+
+# Crypto - BouncyCastle (client cert PEM cho token-auth / mTLS)
+bouncycastle-bcpkix = { group = "org.bouncycastle", name = "bcpkix-jdk18on", version.ref = "bouncycastle" }
+bouncycastle-bcprov = { group = "org.bouncycastle", name = "bcprov-jdk18on", version.ref = "bouncycastle" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

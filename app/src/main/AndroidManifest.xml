@@ -38,6 +38,11 @@
             android:exported="false" />
 
         <activity
+            android:name=".presentation.windows.WindowsConnectActivity"
+            android:screenOrientation="sensorLandscape"
+            android:exported="false" />
+
+        <activity
             android:name=".presentation.setting.SettingActivity"
             android:screenOrientation="sensorLandscape"
             android:exported="false" />
