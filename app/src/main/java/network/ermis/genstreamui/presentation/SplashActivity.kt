@@ -36,9 +36,8 @@ class SplashActivity : AppCompatActivity() {
         windowInsetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
 
-//        observeDestination()
-//        viewModel.checkSession()
-        navigateTo(MainActivity::class.java)
+        observeDestination()
+        viewModel.checkSession()
     }
 
     private fun observeDestination() {
