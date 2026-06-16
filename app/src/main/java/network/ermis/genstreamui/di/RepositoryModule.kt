@@ -6,10 +6,12 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import network.ermis.genstreamui.database.network.repository.AuthRepositoryImpl
 import network.ermis.genstreamui.database.network.repository.GameRepositoryImpl
+import network.ermis.genstreamui.database.network.repository.GatewayRepositoryImpl
 import network.ermis.genstreamui.database.network.repository.SessionRepositoryImpl
 import network.ermis.genstreamui.database.network.repository.UserRepositoryImpl
 import network.ermis.genstreamui.domain.repository.AuthRepository
 import network.ermis.genstreamui.domain.repository.GameRepository
+import network.ermis.genstreamui.domain.repository.GatewayRepository
 import network.ermis.genstreamui.domain.repository.SessionRepository
 import network.ermis.genstreamui.domain.repository.UserRepository
 import javax.inject.Singleton
@@ -37,4 +39,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindSessionRepository(impl: SessionRepositoryImpl): SessionRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindGatewayRepository(impl: GatewayRepositoryImpl): GatewayRepository
 }

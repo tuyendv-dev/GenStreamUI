@@ -31,4 +31,10 @@ class SessionRepositoryImpl @Inject constructor(
 
     override suspend fun endSession(sessionId: Int) =
         sessionsService.endSession(sessionId)
+
+    override suspend fun getSession(sessionId: Int) =
+        sessionsService.getSession(sessionId)
+
+    override suspend fun getAgentToken(sessionId: Int) =
+        sessionsService.getAgentToken(sessionId)
 }

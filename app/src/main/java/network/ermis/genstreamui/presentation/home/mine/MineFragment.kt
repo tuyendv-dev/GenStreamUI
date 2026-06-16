@@ -3,6 +3,7 @@ package network.ermis.genstreamui.presentation.home.mine
 import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
 import android.animation.ValueAnimator
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
@@ -15,6 +16,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import network.ermis.genstreamui.R
 import network.ermis.genstreamui.databinding.FragmentMineBinding
 import network.ermis.genstreamui.databinding.ItemMineTileBinding
+import network.ermis.genstreamui.presentation.windows.WindowsConnectActivity
 
 @AndroidEntryPoint
 class MineFragment : Fragment() {
@@ -29,6 +31,11 @@ class MineFragment : Fragment() {
     private var snapRunnable: Runnable? = null
     private var isProgrammaticScroll = false
     private var steamGridAnimator: ObjectAnimator? = null
+
+    private companion object {
+        /** Index tile Windows (PC Emulator) trong [tileItems]. */
+        const val TILE_WINDOWS = 1
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -63,6 +70,16 @@ class MineFragment : Fragment() {
         }
 
         setupTiles()
+
+        // Nút action của panel chi tiết: tile Windows (index 1) -> mở màn kết nối máy tính.
+        binding.btnAction.setOnClickListener {
+            when (selectedIndex) {
+                TILE_WINDOWS -> startActivity(
+                    Intent(requireContext(), WindowsConnectActivity::class.java)
+                )
+                // Các tile khác (Steam, Epic...) sẽ wire sau.
+            }
+        }
 
         binding.horizontalScrollViewTiles.setOnScrollChangeListener { _, scrollX, _, _, _ ->
             if (isProgrammaticScroll) return@setOnScrollChangeListener

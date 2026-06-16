@@ -45,7 +45,9 @@ class ResultWrapperCallAdapter<R>(
                             }
                             ResultWrapper.GenericError(
                                 code = error?.code ?: response.code(),
-                                message = error?.message
+                                message = error?.message,
+                                error = error?.error,
+                                detail = error?.detail
                             )
                         }
 

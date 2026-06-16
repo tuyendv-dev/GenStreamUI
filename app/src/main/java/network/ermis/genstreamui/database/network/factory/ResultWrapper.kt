@@ -15,8 +15,16 @@ sealed class ResultWrapper<out T> {
         @SerializedName("code")
         val code: Int? = null,
         @SerializedName("message")
-        val message: String? = null
-    ) : ResultWrapper<Nothing>()
+        val message: String? = null,
+        // String code từ envelope lỗi backend: { "error": "VM_NOT_READY", ... } (genstream-custom-auth.md §3).
+        @SerializedName("error")
+        val error: String? = null,
+        @SerializedName("detail")
+        val detail: String? = null
+    ) : ResultWrapper<Nothing>() {
+        /** Error code đã chuẩn hoá để switch an toàn. [ApiErrorCode.UNKNOWN] nếu không có/không khớp. */
+        val apiError: ApiErrorCode get() = ApiErrorCode.from(error)
+    }
 
     data object NetworkError : ResultWrapper<Nothing>()
 }

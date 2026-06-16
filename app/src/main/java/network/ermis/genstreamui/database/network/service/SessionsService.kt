@@ -3,10 +3,12 @@ package network.ermis.genstreamui.database.network.service
 import network.ermis.genstreamui.database.network.factory.ResultWrapper
 import network.ermis.genstreamui.domain.model.dto.req.ReqConnectionToken
 import network.ermis.genstreamui.domain.model.dto.req.ReqStartSession
+import network.ermis.genstreamui.domain.model.dto.res.ResAgentToken
 import network.ermis.genstreamui.domain.model.dto.res.ResConnectionToken
 import network.ermis.genstreamui.domain.model.dto.res.ResEndSession
 import network.ermis.genstreamui.domain.model.dto.res.ResSession
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.Path
@@ -58,4 +60,24 @@ interface SessionsService {
         @Path("id") sessionId: Int,
         @Header("Accept") accept: String = "application/json"
     ): ResultWrapper<ResEndSession>
+
+    /**
+     * Probe trạng thái phiên — GET /sessions/{id}. Không side-effect, không tốn connection token,
+     * không rate-limit; tiện kiểm tra phiên còn `running` (vd khôi phục sau crash). §9.
+     */
+    @GET("/sessions/{id}")
+    suspend fun getSession(
+        @Path("id") sessionId: Int,
+        @Header("Accept") accept: String = "application/json"
+    ): ResultWrapper<ResSession>
+
+    /**
+     * Lấy agent token (Bearer cho genstream-agent /launch /close) — POST /sessions/{id}/agent-token
+     * (body rỗng). TTL 3600s, reusable. Chỉ cần cho Play-Now. §6 Stage 3a.
+     */
+    @POST("/sessions/{id}/agent-token")
+    suspend fun getAgentToken(
+        @Path("id") sessionId: Int,
+        @Header("Accept") accept: String = "application/json"
+    ): ResultWrapper<ResAgentToken>
 }
