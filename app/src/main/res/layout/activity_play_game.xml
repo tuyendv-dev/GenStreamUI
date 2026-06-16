@@ -231,6 +231,7 @@
 
     <!-- Footer (matches homefragment footer structure) -->
     <ImageView
+        android:visibility="gone"
         android:id="@+id/footer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

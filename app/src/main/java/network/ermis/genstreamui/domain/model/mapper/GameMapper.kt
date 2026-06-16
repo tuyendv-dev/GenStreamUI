@@ -34,7 +34,8 @@ fun GameDTO.toDomain(): Game = Game(
     featured = featured ?: false,
     hot = hot ?: false,
     recommended = recommended ?: false,
-    isActive = isActive ?: false
+    isActive = isActive ?: false,
+    steamAppid = steamAppid ?: 0
 )
 
 fun DiscoverySectionDTO.toDomain(): DiscoverySection = DiscoverySection(

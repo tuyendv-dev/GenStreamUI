@@ -16,7 +16,7 @@ import network.ermis.genstreamui.domain.model.entities.RecentGameEntity
  */
 @Database(
     entities = [RecentGameEntity::class, GameEntity::class, DiscoveryRefEntity::class],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

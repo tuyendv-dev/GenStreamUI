@@ -2,6 +2,7 @@ package network.ermis.genstreamui.presentation.windows
 
 import android.os.Build
 import android.os.SystemClock
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -88,7 +89,11 @@ class WindowsConnectViewModel @Inject constructor(
                     // Kết nối VM thành công → bắt đầu heartbeat 30s/lần TỪ ĐÂY (tránh beat lúc còn provisioning).
                     startHeartbeat(session.id)
                     _stage.value = ConnectStage.Connected(r.effectiveName, token.host, token.port)
-                    if (appId > 0) ensureAgentTokenAndLaunch(session.id)
+                    if (appId > 0) {
+                        launchGameFireAndForget(session.id)
+                    } else {
+                        Log.i(TAG, "Stage 3a bỏ qua (appId=$appId) → chỉ stream Desktop")
+                    }
                 }
                 is TokenAuthResult.Rejected -> fail(r.message)
                 is TokenAuthResult.Error -> fail(r.message)
@@ -96,14 +101,31 @@ class WindowsConnectViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Stage 3a launch game qua agent — **FIRE-AND-FORGET**: chạy ở coroutine riêng, KHÔNG chặn luồng
+     * connect/stream. Mọi lỗi (agent-token/launch/exception) đều bị nuốt → stream Desktop vẫn tiếp tục,
+     * user tự mở game nếu cần. Agent không track state nên ta cũng không chờ/không retry.
+     */
+    private fun launchGameFireAndForget(sessionId: Int) {
+        viewModelScope.launch {
+            runCatching { ensureAgentTokenAndLaunch(sessionId) }
+                .onFailure { Log.w(TAG, "Stage 3a lỗi (bỏ qua, vẫn stream Desktop): ${it.message}") }
+        }
+    }
+
     /** Stage 3a — lấy agent token rồi launch game. Fire-and-forget: fail vẫn giữ stream Desktop. */
     private suspend fun ensureAgentTokenAndLaunch(sessionId: Int) {
+        val p = platform.ifEmpty { DEFAULT_PLATFORM }
+        Log.i(TAG, "Stage 3a: agent launch — session=$sessionId platform=$p appId=$appId")
+
         val tokenState = getAgentToken(sessionId)
         if (tokenState is UiState.Success) {
             agentToken = tokenState.data
-            launchGame(tokenState.data, platform.ifEmpty { DEFAULT_PLATFORM }, appId)
+            val result = launchGame(tokenState.data, p, appId)
+            Log.i(TAG, "Stage 3a: agent /launch result = $result")
+        } else {
+            Log.w(TAG, "Stage 3a: agent-token thất bại ($tokenState) → bỏ qua launch, stream Desktop")
         }
-        // Lấy agent token / launch fail → bỏ qua, user tự mở game trong Desktop.
     }
 
     /** Stage 0. Trả [Session] nếu tạo phiên thành công, null (đã set Failed) nếu lỗi. */
@@ -194,6 +216,7 @@ class WindowsConnectViewModel @Inject constructor(
     }
 
     private companion object {
+        const val TAG = "WindowsConnect"
         const val POLL_INTERVAL_MS = 7_000L
         const val RATE_LIMIT_BACKOFF_MS = 15_000L
         const val POLL_BUDGET_MS = 5 * 60 * 1000L

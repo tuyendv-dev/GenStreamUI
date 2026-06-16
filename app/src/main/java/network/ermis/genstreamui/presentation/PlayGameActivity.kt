@@ -1,5 +1,6 @@
 package network.ermis.genstreamui.presentation
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -19,8 +20,8 @@ import network.ermis.genstreamui.databinding.ActivityPlayGameBinding
 import network.ermis.genstreamui.domain.model.Game
 import network.ermis.genstreamui.domain.model.extension.getGameBackground
 import network.ermis.genstreamui.domain.model.extension.getShortDescriptionExt
-
 import network.ermis.genstreamui.presentation.widget.setupStatusIcons
+import network.ermis.genstreamui.presentation.windows.WindowsConnectActivity
 
 @AndroidEntryPoint
 class PlayGameActivity : AppCompatActivity() {
@@ -32,6 +33,9 @@ class PlayGameActivity : AppCompatActivity() {
 
     // Đảm bảo animation zoom-out của artwork chỉ chạy 1 lần (bindGame có thể gọi 2 lần: cache + API).
     private var artworkZoomed = false
+
+    // Game đang hiển thị (set khi bindGame), để bấm Play Now mở kết nối đúng game.
+    private var currentGame: Game? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,6 +93,9 @@ class PlayGameActivity : AppCompatActivity() {
         binding.btnPlayNow.addScaleClickEffect()
         binding.btnMore.addScaleClickEffect()
         binding.btnCheckCompatibility.addScaleClickEffect()
+
+        // Play Now → kết nối VM rồi stream THẲNG vào game (không qua lưới AppView).
+        binding.btnPlayNow.setOnClickListener { openWindowsConnectForPlay() }
 
         val hideCompatibilityBadge = {
             if (binding.btnCheckCompatibility.visibility == android.view.View.VISIBLE) {
@@ -152,12 +159,28 @@ class PlayGameActivity : AppCompatActivity() {
 
     /** Bind dữ liệu game vào UI (title, mô tả, ảnh artwork). */
     private fun bindGame(game: Game) {
+        currentGame = game
         binding.tvGameTitle.text = game.title
         binding.tvGameDesc.text = game.getShortDescriptionExt()
 
         binding.ivGameArtwork.loadCover(game.getGameBackground()) { zoomOutArtwork() }
 
         bindPlatforms(game.platforms)
+    }
+
+    /** Mở WindowsConnectActivity ở chế độ Play Now (stream thẳng vào game, không qua lưới AppView). */
+    private fun openWindowsConnectForPlay() {
+        val steamId = currentGame?.steamAppid ?: 0
+        val intent = Intent(this, WindowsConnectActivity::class.java).apply {
+            putExtra(WindowsConnectActivity.EXTRA_OPEN_APP_LIST, false)
+            // steam_appid → platform là "steam"; agent /launch tự mở đúng game (Stage 3a) khi appId > 0.
+            putExtra(
+                WindowsConnectActivity.EXTRA_PLATFORM,
+                if (steamId > 0) "steam" else currentGame?.platforms?.firstOrNull().orEmpty()
+            )
+            putExtra(WindowsConnectActivity.EXTRA_APP_ID, steamId)
+        }
+        startActivity(intent)
     }
 
     /**

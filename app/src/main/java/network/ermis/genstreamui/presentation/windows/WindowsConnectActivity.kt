@@ -16,6 +16,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.limelight.AppView
 import com.limelight.computers.ComputerManagerService
 import com.limelight.nvstream.http.ComputerDetails
 import com.limelight.nvstream.http.NvApp
@@ -52,10 +53,16 @@ class WindowsConnectActivity : AppCompatActivity() {
     private val platform: String by lazy { intent.getStringExtra(EXTRA_PLATFORM).orEmpty() }
     private val appId: Int by lazy { intent.getIntExtra(EXTRA_APP_ID, 0) }
 
+    // true (mặc định, Import PC games) → mở lưới AppView; false (Play Now) → stream thẳng vào game.
+    private val openAppList: Boolean by lazy { intent.getBooleanExtra(EXTRA_OPEN_APP_LIST, true) }
+
     // Binder của ComputerManagerService (Moonlight) — hoàn tất khi service connected.
     private val managerBinderDeferred = CompletableDeferred<ComputerManagerService.ComputerManagerBinder>()
     private var serviceBound = false
     private var streamLaunched = false
+
+    // Sau khi đã mở stream/AppView, lần quay lại màn này sẽ tự đóng luôn (kết thúc phiên).
+    private var finishOnReturn = false
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
@@ -133,8 +140,9 @@ class WindowsConnectActivity : AppCompatActivity() {
             // Warm-up: Sunshine HTTP/HTTPS của VM (serverinfo base+0 / base−5) có thể chưa lên ngay
             // sau token-auth → thử đăng ký host nhiều lần đến khi ONLINE.
             var registered: ComputerDetails? = null
+            val title = if (openAppList) "Đang tải danh sách ứng dụng..." else "Đang mở màn hình máy tính..."
             for (attempt in 1..MAX_REGISTER_ATTEMPTS) {
-                showProgress("Đang mở màn hình máy tính...", "Đang chờ host sẵn sàng ($attempt)")
+                showProgress(title, "Đang chờ host sẵn sàng ($attempt)")
                 val details = ComputerDetails().apply {
                     manualAddress = ComputerDetails.AddressTuple(connected.host, connected.basePort)
                     this.serverCert = serverCert
@@ -156,15 +164,27 @@ class WindowsConnectActivity : AppCompatActivity() {
             }
 
             if (registered != null) {
-                // HTTPS qua relay = base − 5 (chắc chắn Game dùng đúng cổng, bỏ dò HTTP base+0).
+                // HTTPS qua relay = base − 5 (chắc chắn dùng đúng cổng, bỏ dò HTTP base+0).
                 registered.httpsPort = connected.basePort - 5
-                // Vào thẳng Desktop (NvApp name-only → NvConnection.getAppByName resolve trên host).
-                // createStartIntent tự set EXTRA_SERVER_PORT_BASE vì derivePortsFromBase = true.
-                startActivity(
-                    ServerHelper.createStartIntent(
-                        this@WindowsConnectActivity, NvApp(DESKTOP_APP), registered, binder
+                // Mở stream/AppView → khi back về màn này sẽ tự đóng (xem onResume).
+                finishOnReturn = true
+                if (openAppList) {
+                    // Import PC games → mở lưới app (AppView) để chọn (Desktop/Steam...).
+                    startActivity(
+                        Intent(this@WindowsConnectActivity, AppView::class.java).apply {
+                            putExtra(AppView.NAME_EXTRA, registered.name)
+                            putExtra(AppView.UUID_EXTRA, registered.uuid)
+                        }
                     )
-                )
+                } else {
+                    // Play Now → stream thẳng vào game (NvApp name-only → host getAppByName resolve).
+                    // createStartIntent tự set EXTRA_SERVER_PORT_BASE vì derivePortsFromBase = true.
+                    startActivity(
+                        ServerHelper.createStartIntent(
+                            this@WindowsConnectActivity, NvApp(DESKTOP_APP), registered, binder
+                        )
+                    )
+                }
             } else {
                 streamLaunched = false
                 showResult(
@@ -190,6 +210,12 @@ class WindowsConnectActivity : AppCompatActivity() {
         binding.tvDetail.text = detail
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Đã mở stream/AppView rồi quay lại đây → đóng màn luôn (ViewModel.onCleared sẽ end phiên).
+        if (finishOnReturn) finish()
+    }
+
     override fun onDestroy() {
         if (serviceBound) {
             unbindService(serviceConnection)
@@ -207,6 +233,9 @@ class WindowsConnectActivity : AppCompatActivity() {
 
         /** (Play-Now) appid của game trên host; <= 0 nghĩa là chỉ stream Desktop. */
         const val EXTRA_APP_ID = "extra_app_id"
+
+        /** true (Import PC games) → mở lưới AppView; false (Play Now) → stream thẳng vào game. */
+        const val EXTRA_OPEN_APP_LIST = "extra_open_app_list"
 
         private const val PC_NAME = "GenStream VM"
         private const val DESKTOP_APP = "Desktop"

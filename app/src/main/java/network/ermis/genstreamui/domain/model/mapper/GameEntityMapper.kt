@@ -30,7 +30,8 @@ fun Game.toEntity(): GameEntity = GameEntity(
     featured = featured,
     hot = hot,
     recommended = recommended,
-    isActive = isActive
+    isActive = isActive,
+    steamAppid = steamAppid
 )
 
 fun GameEntity.toDomain(): Game = Game(
@@ -56,5 +57,6 @@ fun GameEntity.toDomain(): Game = Game(
     featured = featured,
     hot = hot,
     recommended = recommended,
-    isActive = isActive
+    isActive = isActive,
+    steamAppid = steamAppid
 )

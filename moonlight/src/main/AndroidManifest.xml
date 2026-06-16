@@ -53,6 +53,7 @@
         <!-- PcView: KHÔNG còn launcher intent-filter (mở bằng điều hướng nội bộ, không tạo icon launcher) -->
         <activity
             android:name=".PcView"
+            android:screenOrientation="sensorLandscape"
             android:exported="false"
             android:resizeableActivity="true"
             android:enableOnBackInvokedCallback="true"
@@ -62,6 +63,7 @@
         </activity>
         <activity
             android:name=".ShortcutTrampoline"
+            android:screenOrientation="sensorLandscape"
             android:noHistory="true"
             android:exported="false"
             android:resizeableActivity="true"
@@ -72,6 +74,7 @@
         </activity>
         <activity
             android:name=".AppView"
+            android:screenOrientation="sensorLandscape"
             android:resizeableActivity="true"
             android:enableOnBackInvokedCallback="true"
             android:configChanges="mcc|mnc|touchscreen|keyboard|keyboardHidden|navigation|screenLayout|fontScale|uiMode|orientation|screenSize|smallestScreenSize|layoutDirection">
@@ -80,6 +83,7 @@
         </activity>
         <activity
             android:name=".preferences.StreamSettings"
+            android:screenOrientation="sensorLandscape"
             android:resizeableActivity="true"
             android:enableOnBackInvokedCallback="true"
             android:configChanges="mcc|mnc|touchscreen|keyboard|keyboardHidden|navigation|screenLayout|fontScale|uiMode|orientation|screenSize|smallestScreenSize|layoutDirection"
@@ -89,6 +93,7 @@
         </activity>
         <activity
             android:name=".preferences.AddComputerManually"
+            android:screenOrientation="sensorLandscape"
             android:resizeableActivity="true"
             android:windowSoftInputMode="stateVisible"
             android:enableOnBackInvokedCallback="true"
@@ -99,6 +104,7 @@
         </activity>
         <activity
             android:name=".Game"
+            android:screenOrientation="sensorLandscape"
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|screenLayout|fontScale|uiMode|orientation|screenSize|smallestScreenSize|layoutDirection"
             android:noHistory="true"
             android:supportsPictureInPicture="true"
@@ -126,6 +132,7 @@
 
         <activity
             android:name=".HelpActivity"
+            android:screenOrientation="sensorLandscape"
             android:resizeableActivity="true"
             android:enableOnBackInvokedCallback="true"
             android:configChanges="mcc|mnc|touchscreen|keyboard|keyboardHidden|navigation|screenLayout|fontScale|uiMode|orientation|screenSize|smallestScreenSize|layoutDirection">

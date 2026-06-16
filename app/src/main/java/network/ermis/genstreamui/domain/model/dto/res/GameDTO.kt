@@ -42,5 +42,7 @@ data class GameDTO(
     val hot: Boolean? = null,
     val recommended: Boolean? = null,
     @SerializedName("is_active")
-    val isActive: Boolean? = null
+    val isActive: Boolean? = null,
+    @SerializedName("steam_appid")
+    val steamAppid: Int? = null
 )

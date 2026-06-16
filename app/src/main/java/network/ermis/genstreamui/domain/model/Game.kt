@@ -29,5 +29,7 @@ data class Game(
     val featured: Boolean = false,
     val hot: Boolean = false,
     val recommended: Boolean = false,
-    val isActive: Boolean = false
+    val isActive: Boolean = false,
+    // Steam App ID (cho agent /launch khi Play Now game Steam). 0 nếu không có.
+    val steamAppid: Int = 0
 )

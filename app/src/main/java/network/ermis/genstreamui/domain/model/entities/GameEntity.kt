@@ -33,5 +33,6 @@ data class GameEntity(
     val featured: Boolean = false,
     val hot: Boolean = false,
     val recommended: Boolean = false,
-    val isActive: Boolean = false
+    val isActive: Boolean = false,
+    val steamAppid: Int = 0
 )
