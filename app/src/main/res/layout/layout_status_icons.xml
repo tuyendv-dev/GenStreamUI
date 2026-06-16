@@ -17,7 +17,7 @@
         android:nextFocusUp="@id/ivStatusSearch"
         android:nextFocusRight="@id/ivStatusSearch"
         android:nextFocusLeft="@id/tabFindGame"
-        android:background="@drawable/bg_view_selector"
+        android:background="@drawable/bg_view_selector_radius_12"
         android:src="@drawable/ic_search"
         app:tint="@color/white" />
 

@@ -6,6 +6,7 @@ import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import network.ermis.genstreamui.common.base.ext.loadCover
 import network.ermis.genstreamui.databinding.ItemGameBinding
@@ -17,7 +18,7 @@ import network.ermis.genstreamui.presentation.addScaleClickEffect
 /**
  * Adapter card game trong một hàng category màn Discovery. Bind list [network.ermis.genstreamui.domain.model.Game]:
  * cover = main_capsule (fallback header_image), title = title, desc = short_description.
- * Cụm icon nền tảng để tĩnh trong layout (theo thiết kế). Giữ logic chặn focus DPAD cho TV.
+ * Cụm icon nền tảng (llPlatforms) hiện/ẩn theo [Game.platforms]. Giữ logic chặn focus DPAD cho TV.
  */
 class GameAdapter(
     private val games: List<Game>,
@@ -37,6 +38,8 @@ class GameAdapter(
         holder.binding.tvGameTitle.text = game.title
         holder.binding.tvGameDesc.text = game.getShortDescriptionExt()
         holder.binding.ivGameCover.loadCover(game.getGameImage())
+
+        bindPlatforms(holder.binding, game.platforms)
 
         holder.binding.root.addScaleClickEffect()
         holder.binding.root.setOnClickListener { onClick(game) }
@@ -71,6 +74,27 @@ class GameAdapter(
             }
             false
         }
+    }
+
+    /**
+     * Hiện/ẩn từng icon trong llPlatforms theo [platforms] của game. Mỗi icon chỉ hiện nếu [platforms]
+     * (chuẩn hoá lowercase) chứa một trong các alias tương ứng. Phải set cả 7 mỗi lần bind vì view tái dùng.
+     */
+    private fun bindPlatforms(binding: ItemGameBinding, platforms: List<String>) {
+        val keys = platforms.map { it.trim().lowercase() }.toHashSet()
+
+        fun toggle(view: ImageView, vararg aliases: String) {
+            view.visibility = if (aliases.any { it in keys }) View.VISIBLE else View.GONE
+        }
+
+        // Windows luôn hiện (app stream PC).
+        binding.ivWindows.visibility = View.VISIBLE
+        toggle(binding.ivSteam, "steam")
+        toggle(binding.ivXbox, "xbox", "microsoft")
+        toggle(binding.ivGog, "gog")
+        toggle(binding.ivEa, "ea", "origin")
+        toggle(binding.ivBattle, "battle-net", "battlenet", "battle")
+        toggle(binding.ivEpic, "epic", "epicgames", "epic-games")
     }
 
     override fun getItemCount() = games.size

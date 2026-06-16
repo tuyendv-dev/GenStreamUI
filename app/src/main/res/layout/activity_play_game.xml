@@ -30,6 +30,8 @@
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:background="@drawable/bg_gradient_horizontal_black"
+        android:clickable="true"
+        android:focusable="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@id/flGameArtwork"
         app:layout_constraintStart_toStartOf="@id/flGameArtwork"
@@ -56,7 +58,7 @@
             android:src="@drawable/ic_back"
             app:tint="@color/white"
             android:clickable="true"
-            android:focusable="true"
+            android:focusable="false"
             android:background="?attr/selectableItemBackgroundBorderless" />
 
         <Space
@@ -106,6 +108,7 @@
 
         <!-- Platform Icons -->
         <LinearLayout
+            android:id="@+id/llPlatforms"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
@@ -113,16 +116,53 @@
             android:gravity="center_vertical">
 
             <ImageView
+                android:id="@+id/ivWindows"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:src="@drawable/ic_windows"
                 app:tint="@color/white" />
 
             <ImageView
+                android:id="@+id/ivSteam"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
-                android:layout_marginStart="14dp"
-                android:src="@drawable/ic_steam"/>
+                android:layout_marginStart="12dp"
+                android:src="@drawable/ic_steam" />
+
+            <ImageView
+                android:id="@+id/ivXbox"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginStart="12dp"
+                android:src="@drawable/ic_xbox_game" />
+
+            <ImageView
+                android:id="@+id/ivGog"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginStart="12dp"
+                android:src="@drawable/ic_gog_com" />
+
+            <ImageView
+                android:id="@+id/ivBattle"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginStart="12dp"
+                android:src="@drawable/ic_battle_game" />
+
+            <ImageView
+                android:id="@+id/ivEa"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_marginStart="10dp"
+                android:src="@drawable/ic_ea_game" />
+
+            <ImageView
+                android:id="@+id/ivEpic"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_marginStart="10dp"
+                android:src="@drawable/ic_epic_game" />
 
         </LinearLayout>
 
@@ -140,13 +180,15 @@
                 android:layout_width="235dp"
                 android:layout_height="44dp"
                 android:background="@drawable/bg_button_play_now"
+                android:foreground="@drawable/bg_view_image_selector_radius_8"
                 android:gravity="center"
                 android:text="Play now"
                 android:textColor="@color/black"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:clickable="true"
-                android:focusable="true" />
+                android:focusable="true"
+                android:focusedByDefault="true" />
 
             <!-- More Button (...) -->
             <TextView
@@ -155,6 +197,7 @@
                 android:layout_height="44dp"
                 android:layout_marginStart="6dp"
                 android:background="@drawable/bg_button_more"
+                android:foreground="@drawable/bg_view_selector_radius_8"
                 android:gravity="center"
                 android:text="•••"
                 android:textColor="@color/white"
@@ -175,6 +218,7 @@
         android:layout_marginTop="4dp"
         android:layout_marginStart="242dp"
         android:background="@drawable/bg_badge_compatibility"
+        android:foreground="@drawable/bg_view_selector_radius_8"
         android:paddingHorizontal="16dp"
         android:paddingVertical="10dp"
         android:text="Check Compatibility"

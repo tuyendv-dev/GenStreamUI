@@ -38,6 +38,9 @@ class DiscoveryFragment :
     private var topSideGame: Game? = null
     private var bottomSideGame: Game? = null
 
+    // Danh sách banner chính (theo trang vpMainBanner), để nhấn A mở đúng game đang hiển thị.
+    private var mainBannerGames: List<Game> = emptyList()
+
     private val slideHandler = Handler(Looper.getMainLooper())
     private val slideRunnable = Runnable {
         if (view == null) return@Runnable
@@ -112,6 +115,29 @@ class DiscoveryFragment :
         }
     }
 
+    /**
+     * Khi focus vào [mainBannerCard] và nhấn A (tay cầm) / OK → mở game đang hiển thị của
+     * vpMainBanner (giống click item). Các phím khác vẫn theo strict-row (LEFT/RIGHT).
+     */
+    private val mainBannerKeyListener = View.OnKeyListener { v, keyCode, event ->
+        if (event.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0 && isConfirmKey(keyCode)) {
+            openCurrentMainBanner()
+            return@OnKeyListener true
+        }
+        strictRowFocusListener.onKey(v, keyCode, event)
+    }
+
+    private fun isConfirmKey(keyCode: Int): Boolean =
+        keyCode == KeyEvent.KEYCODE_BUTTON_A ||
+            keyCode == KeyEvent.KEYCODE_DPAD_CENTER ||
+            keyCode == KeyEvent.KEYCODE_ENTER ||
+            keyCode == KeyEvent.KEYCODE_NUMPAD_ENTER
+
+    /** Mở game ứng với trang đang hiển thị của carousel banner chính. */
+    private fun openCurrentMainBanner() {
+        mainBannerGames.getOrNull(binding.vpMainBanner.currentItem)?.let { openPlayGame(it) }
+    }
+
     override fun initViews() {
         setupSideBannerClicks()
         setupScrollEffect()
@@ -155,7 +181,11 @@ class DiscoveryFragment :
     }
 
     private fun bindMainBanner(featured: List<Game>) {
+        mainBannerGames = featured
         binding.vpMainBanner.adapter = DiscoveryBannerAdapter(featured) { openPlayGame(it) }
+
+        // Nhấn A (tay cầm) khi focus card banner chính → mở game đang hiển thị (đặt sau applyStrictRowFocus).
+        binding.mainBannerCard.setOnKeyListener(mainBannerKeyListener)
 
         setupIndicators(featured.size)
         if (featured.isNotEmpty()) setCurrentIndicator(0)

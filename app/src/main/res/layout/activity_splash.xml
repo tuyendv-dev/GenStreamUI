@@ -2,7 +2,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_color">
+    android:background="@color/ic_launcher_background">
 
     <ImageView
         android:id="@+id/ivLogo"
@@ -10,6 +10,6 @@
         android:layout_height="180dp"
         android:layout_gravity="center"
         android:contentDescription="@string/app_name"
-        android:src="@mipmap/ic_launcher_foreground" />
+        android:src="@mipmap/ic_launcher" />
 
 </FrameLayout>

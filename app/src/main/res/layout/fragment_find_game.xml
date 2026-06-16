@@ -101,7 +101,7 @@
                     android:layout_weight="1"
                     android:clickable="true"
                     android:focusable="true"
-                    android:foreground="@drawable/bg_view_image_selector"
+                    android:foreground="@drawable/bg_view_image_selector_radius_12"
                     android:nextFocusLeft="@id/card1"
                     app:cardCornerRadius="12dp"
                     app:cardElevation="0dp">
@@ -128,7 +128,7 @@
                     android:layout_weight="1"
                     android:clickable="true"
                     android:focusable="true"
-                    android:foreground="@drawable/bg_view_image_selector"
+                    android:foreground="@drawable/bg_view_image_selector_radius_12"
                     app:cardCornerRadius="12dp"
                     app:cardElevation="0dp">
 
@@ -154,7 +154,7 @@
                     android:layout_weight="1"
                     android:clickable="true"
                     android:focusable="true"
-                    android:foreground="@drawable/bg_view_image_selector"
+                    android:foreground="@drawable/bg_view_image_selector_radius_12"
                     app:cardCornerRadius="12dp"
                     app:cardElevation="0dp">
 
@@ -180,7 +180,7 @@
                     android:layout_weight="1"
                     android:clickable="true"
                     android:focusable="true"
-                    android:foreground="@drawable/bg_view_image_selector"
+                    android:foreground="@drawable/bg_view_image_selector_radius_12"
                     app:cardCornerRadius="12dp"
                     app:cardElevation="0dp">
 
@@ -206,7 +206,7 @@
                     android:layout_weight="1"
                     android:clickable="true"
                     android:focusable="true"
-                    android:foreground="@drawable/bg_view_image_selector"
+                    android:foreground="@drawable/bg_view_image_selector_radius_12"
                     android:nextFocusRight="@id/card5"
                     app:cardCornerRadius="12dp"
                     app:cardElevation="0dp">

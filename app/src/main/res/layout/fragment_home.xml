@@ -33,7 +33,7 @@
             android:nextFocusUp="@id/btnMenu"
             android:nextFocusLeft="@id/btnMenu"
             android:nextFocusRight="@id/tabMine"
-            android:background="@drawable/bg_view_selector"
+            android:background="@drawable/bg_view_selector_radius_12"
             android:src="@drawable/ic_menu"
             app:tint="@color/white" />
 
@@ -59,7 +59,7 @@
                 android:nextFocusUp="@id/tabMine"
                 android:nextFocusLeft="@id/btnMenu"
                 android:nextFocusRight="@id/tabDiscovery"
-                android:background="@drawable/bg_view_selector" />
+                android:background="@drawable/bg_view_selector_radius_12" />
 
             <TextView
                 android:id="@+id/tabDiscovery"
@@ -76,7 +76,7 @@
                 android:nextFocusUp="@id/tabDiscovery"
                 android:nextFocusLeft="@id/tabMine"
                 android:nextFocusRight="@id/tabFindGame"
-                android:background="@drawable/bg_view_selector" />
+                android:background="@drawable/bg_view_selector_radius_12" />
 
             <TextView
                 android:id="@+id/tabFindGame"
@@ -92,7 +92,7 @@
                 android:nextFocusUp="@id/tabFindGame"
                 android:nextFocusLeft="@id/tabDiscovery"
                 android:nextFocusRight="@id/ivStatusSearch"
-                android:background="@drawable/bg_view_selector" />
+                android:background="@drawable/bg_view_selector_radius_12" />
         </LinearLayout>
 
         <Space

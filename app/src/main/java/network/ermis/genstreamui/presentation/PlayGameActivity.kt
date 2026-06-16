@@ -156,6 +156,29 @@ class PlayGameActivity : AppCompatActivity() {
         binding.tvGameDesc.text = game.getShortDescriptionExt()
 
         binding.ivGameArtwork.loadCover(game.getGameBackground()) { zoomOutArtwork() }
+
+        bindPlatforms(game.platforms)
+    }
+
+    /**
+     * Hiện/ẩn từng icon trong llPlatforms theo [platforms] của game — giống logic ở GameAdapter.
+     * Windows luôn hiện (app stream PC); các icon khác chỉ hiện nếu [platforms] chứa alias tương ứng.
+     */
+    private fun bindPlatforms(platforms: List<String>) {
+        val keys = platforms.map { it.trim().lowercase() }.toHashSet()
+
+        fun toggle(view: android.view.View, vararg aliases: String) {
+            view.visibility =
+                if (aliases.any { it in keys }) android.view.View.VISIBLE else android.view.View.GONE
+        }
+
+        binding.ivWindows.visibility = android.view.View.VISIBLE
+        toggle(binding.ivSteam, "steam")
+        toggle(binding.ivXbox, "xbox", "microsoft")
+        toggle(binding.ivGog, "gog")
+        toggle(binding.ivBattle, "battle-net", "battlenet", "battle")
+        toggle(binding.ivEa, "ea", "origin")
+        toggle(binding.ivEpic, "epic", "epicgames", "epic-games")
     }
 
     /** Chạy animation zoom-out cho artwork khi ảnh đã load xong (chỉ chạy 1 lần). */

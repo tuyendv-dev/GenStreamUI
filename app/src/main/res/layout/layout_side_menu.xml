@@ -17,7 +17,7 @@
         android:focusable="true"
         android:layout_marginTop="24dp"
         android:layout_marginHorizontal="16dp"
-        android:background="@drawable/bg_view_selector"
+        android:background="@drawable/bg_view_selector_radius_12"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -67,7 +67,7 @@
             android:layout_marginBottom="8dp"
             android:clickable="true"
             android:focusable="true"
-            android:background="@drawable/bg_view_selector">
+            android:background="@drawable/bg_view_selector_radius_12">
 
             <View
                 android:layout_width="4dp"
@@ -110,7 +110,7 @@
             android:layout_marginBottom="8dp"
             android:clickable="true"
             android:focusable="true"
-            android:background="@drawable/bg_view_selector">
+            android:background="@drawable/bg_view_selector_radius_12">
 
             <ImageView
                 android:id="@+id/iconGame"
@@ -145,7 +145,7 @@
             android:layout_marginBottom="8dp"
             android:clickable="true"
             android:focusable="true"
-            android:background="@drawable/bg_view_selector">
+            android:background="@drawable/bg_view_selector_radius_12">
 
             <ImageView
                 android:id="@+id/iconSteam"
@@ -179,7 +179,7 @@
             android:layout_marginBottom="8dp"
             android:clickable="true"
             android:focusable="true"
-            android:background="@drawable/bg_view_selector">
+            android:background="@drawable/bg_view_selector_radius_12">
 
             <ImageView
                 android:id="@+id/iconSetting"
@@ -213,7 +213,7 @@
             android:layout_marginBottom="8dp"
             android:clickable="true"
             android:focusable="true"
-            android:background="@drawable/bg_view_selector">
+            android:background="@drawable/bg_view_selector_radius_12">
 
             <ImageView
                 android:id="@+id/iconDevice"
@@ -247,7 +247,7 @@
             android:layout_height="56dp"
             android:clickable="true"
             android:focusable="true"
-            android:background="@drawable/bg_view_selector">
+            android:background="@drawable/bg_view_selector_radius_12">
 
             <ImageView
                 android:id="@+id/iconUserCenter"
