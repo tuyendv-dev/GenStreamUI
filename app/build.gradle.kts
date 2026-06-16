@@ -83,6 +83,9 @@ dependencies {
     implementation(libs.bouncycastle.bcpkix)
     implementation(libs.bouncycastle.bcprov)
 
+    // Engine Moonlight (native streaming) — namespace com.limelight
+    implementation(project(":moonlight"))
+
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)

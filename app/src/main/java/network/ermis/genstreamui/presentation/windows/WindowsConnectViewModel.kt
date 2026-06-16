@@ -17,14 +17,18 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import network.ermis.genstreamui.common.UiState
 import network.ermis.genstreamui.database.network.factory.ApiErrorCode
+import network.ermis.genstreamui.domain.model.AgentToken
 import network.ermis.genstreamui.domain.model.ConnectionToken
 import network.ermis.genstreamui.domain.model.Session
 import network.ermis.genstreamui.domain.model.SessionStatus
 import network.ermis.genstreamui.domain.model.TokenAuthResult
+import network.ermis.genstreamui.domain.usecase.session.CloseGameUseCase
 import network.ermis.genstreamui.domain.usecase.session.ConnectionTokenResult
 import network.ermis.genstreamui.domain.usecase.session.EndSessionUseCase
+import network.ermis.genstreamui.domain.usecase.session.GetAgentTokenUseCase
 import network.ermis.genstreamui.domain.usecase.session.GetConnectionTokenUseCase
 import network.ermis.genstreamui.domain.usecase.session.HeartbeatUseCase
+import network.ermis.genstreamui.domain.usecase.session.LaunchGameUseCase
 import network.ermis.genstreamui.domain.usecase.session.StartSessionUseCase
 import network.ermis.genstreamui.domain.usecase.session.TokenAuthUseCase
 import javax.inject.Inject
@@ -43,7 +47,10 @@ class WindowsConnectViewModel @Inject constructor(
     private val getConnectionToken: GetConnectionTokenUseCase,
     private val tokenAuth: TokenAuthUseCase,
     private val heartbeat: HeartbeatUseCase,
-    private val endSession: EndSessionUseCase
+    private val endSession: EndSessionUseCase,
+    private val getAgentToken: GetAgentTokenUseCase,
+    private val launchGame: LaunchGameUseCase,
+    private val closeGame: CloseGameUseCase
 ) : ViewModel() {
 
     private val _stage = MutableStateFlow<ConnectStage>(ConnectStage.Idle)
@@ -54,26 +61,49 @@ class WindowsConnectViewModel @Inject constructor(
     private var connectJob: Job? = null
     private var heartbeatJob: Job? = null
 
-    /** Bắt đầu (hoặc thử lại) luồng kết nối cho [subscriptionId]. */
-    fun connect(subscriptionId: Int) {
+    // Play-Now: nếu [appId] > 0 thì sau khi Authorized sẽ launch game qua agent.
+    private var platform: String = ""
+    private var appId: Int = 0
+    private var agentToken: AgentToken? = null
+
+    /**
+     * Bắt đầu (hoặc thử lại) luồng kết nối cho [subscriptionId].
+     * [platform]/[appId]: nếu [appId] > 0 → Play-Now (mở sẵn game qua agent); 0 → chỉ stream Desktop.
+     */
+    fun connect(subscriptionId: Int, platform: String = "", appId: Int = 0) {
         if (connectJob?.isActive == true) return
+        this.platform = platform
+        this.appId = appId
         connectJob = viewModelScope.launch {
             _stage.value = ConnectStage.CreatingSession
 
             val session = startSessionOrNull(subscriptionId) ?: return@launch
             sessionId = session.id
-            startHeartbeat(session.id)
 
             val token = pollConnectionTokenOrNull(session.id) ?: return@launch
 
             _stage.value = ConnectStage.Authorizing
             when (val r = tokenAuth(token, deviceName)) {
-                is TokenAuthResult.Authorized ->
+                is TokenAuthResult.Authorized -> {
+                    // Kết nối VM thành công → bắt đầu heartbeat 30s/lần TỪ ĐÂY (tránh beat lúc còn provisioning).
+                    startHeartbeat(session.id)
                     _stage.value = ConnectStage.Connected(r.effectiveName, token.host, token.port)
+                    if (appId > 0) ensureAgentTokenAndLaunch(session.id)
+                }
                 is TokenAuthResult.Rejected -> fail(r.message)
                 is TokenAuthResult.Error -> fail(r.message)
             }
         }
+    }
+
+    /** Stage 3a — lấy agent token rồi launch game. Fire-and-forget: fail vẫn giữ stream Desktop. */
+    private suspend fun ensureAgentTokenAndLaunch(sessionId: Int) {
+        val tokenState = getAgentToken(sessionId)
+        if (tokenState is UiState.Success) {
+            agentToken = tokenState.data
+            launchGame(tokenState.data, platform.ifEmpty { DEFAULT_PLATFORM }, appId)
+        }
+        // Lấy agent token / launch fail → bỏ qua, user tự mở game trong Desktop.
     }
 
     /** Stage 0. Trả [Session] nếu tạo phiên thành công, null (đã set Failed) nếu lỗi. */
@@ -146,8 +176,15 @@ class WindowsConnectViewModel @Inject constructor(
         heartbeatJob?.cancel()
         val id = sessionId ?: return
         sessionId = null
+        val at = agentToken
+        val p = platform.ifEmpty { DEFAULT_PLATFORM }
+        val app = appId
         CoroutineScope(Dispatchers.IO).launch {
-            runCatching { endSession(id).collect { } }
+            runCatching {
+                // §9: phải /close TRƯỚC /end (sau /end agent verify token sẽ fail).
+                if (at != null && app > 0) closeGame(at, p, app)
+                endSession(id).collect { }
+            }
         }
     }
 
@@ -161,5 +198,6 @@ class WindowsConnectViewModel @Inject constructor(
         const val RATE_LIMIT_BACKOFF_MS = 15_000L
         const val POLL_BUDGET_MS = 5 * 60 * 1000L
         const val HEARTBEAT_INTERVAL_MS = 30_000L
+        const val DEFAULT_PLATFORM = "steam"
     }
 }

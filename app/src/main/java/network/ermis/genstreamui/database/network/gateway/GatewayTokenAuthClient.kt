@@ -3,6 +3,7 @@ package network.ermis.genstreamui.database.network.gateway
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import network.ermis.genstreamui.BuildConfig
 import network.ermis.genstreamui.database.security.TofuTrustManager
 import network.ermis.genstreamui.domain.model.dto.req.ReqTokenAuth
 import network.ermis.genstreamui.domain.model.dto.res.ResTokenAuth
@@ -10,6 +11,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.logging.HttpLoggingInterceptor
 import java.io.IOException
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
@@ -69,6 +71,14 @@ class GatewayTokenAuthClient @Inject constructor() {
             .sslSocketFactory(ssl.socketFactory, tm)
             // Host là IP + cert tự ký → bỏ hostname verify (TOFU đã giới hạn ở đúng peer cert).
             .hostnameVerifier { _, _ -> true }
+            .apply {
+                // Log HTTP cho token-auth (chỉ DEBUG). BODY in cả token + client cert PEM.
+                if (BuildConfig.DEBUG) {
+                    addInterceptor(
+                        HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
+                    )
+                }
+            }
             .connectTimeout(10, TimeUnit.SECONDS)
             .readTimeout(15, TimeUnit.SECONDS)
             .callTimeout(20, TimeUnit.SECONDS)

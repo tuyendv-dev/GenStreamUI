@@ -1,11 +1,16 @@
 package network.ermis.genstreamui.database.network.repository
 
 import kotlinx.coroutines.delay
+import network.ermis.genstreamui.database.network.gateway.AgentClient
 import network.ermis.genstreamui.database.network.gateway.GatewayTokenAuthClient
-import network.ermis.genstreamui.database.security.IdentityManager
+import network.ermis.genstreamui.database.security.MoonlightClientIdentity
 import network.ermis.genstreamui.database.security.PinnedServerCertStore
+import network.ermis.genstreamui.domain.model.AgentCloseResult
+import network.ermis.genstreamui.domain.model.AgentLaunchResult
+import network.ermis.genstreamui.domain.model.AgentToken
 import network.ermis.genstreamui.domain.model.ConnectionToken
 import network.ermis.genstreamui.domain.model.TokenAuthResult
+import network.ermis.genstreamui.domain.model.dto.req.ReqAgentCommand
 import network.ermis.genstreamui.domain.model.dto.req.ReqTokenAuth
 import network.ermis.genstreamui.domain.repository.GatewayRepository
 import javax.inject.Inject
@@ -18,15 +23,16 @@ import javax.inject.Inject
  * - Thành công → **pin** server cert đã capture vào [PinnedServerCertStore] cho các HTTPS sau.
  */
 class GatewayRepositoryImpl @Inject constructor(
-    private val identityManager: IdentityManager,
+    private val clientIdentity: MoonlightClientIdentity,
     private val client: GatewayTokenAuthClient,
+    private val agentClient: AgentClient,
     private val pinnedStore: PinnedServerCertStore
 ) : GatewayRepository {
 
     override suspend fun tokenAuth(connection: ConnectionToken, deviceName: String): TokenAuthResult {
         val req = ReqTokenAuth(
             token = connection.token,
-            cert = identityManager.certificatePem,
+            cert = clientIdentity.certificatePem(),
             name = deviceName
         )
         val url = connection.authTokenUrl
@@ -60,6 +66,34 @@ class GatewayRepositoryImpl @Inject constructor(
                     code = outcome.body?.code ?: outcome.httpStatus.toString()
                 )
             }
+        }
+    }
+
+    override suspend fun launchGame(
+        agentToken: AgentToken,
+        platform: String,
+        appid: Int
+    ): AgentLaunchResult {
+        val o = agentClient.launch(agentToken.launchUrl, agentToken.token, ReqAgentCommand(platform, appid))
+        val b = o.body
+        return if (o.httpStatus == 200 && b?.ok == true) {
+            AgentLaunchResult.Launched(pid = b.pid ?: 0, saveStatus = b.saveStatus.orEmpty())
+        } else {
+            AgentLaunchResult.Failed(b?.error ?: b?.message ?: "Launch thất bại (HTTP ${o.httpStatus})")
+        }
+    }
+
+    override suspend fun closeGame(
+        agentToken: AgentToken,
+        platform: String,
+        appid: Int
+    ): AgentCloseResult {
+        val o = agentClient.close(agentToken.closeUrl, agentToken.token, ReqAgentCommand(platform, appid))
+        val b = o.body
+        return if (o.httpStatus == 200 && b?.ok == true) {
+            AgentCloseResult.Closed(killed = b.killed ?: false, backupStatus = b.backupStatus.orEmpty())
+        } else {
+            AgentCloseResult.Failed(b?.error ?: b?.message ?: "Close thất bại (HTTP ${o.httpStatus})")
         }
     }
 

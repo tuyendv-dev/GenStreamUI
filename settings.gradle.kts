@@ -16,8 +16,11 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        // ShieldControllerExtensions (Moonlight engine dependency)
+        maven { url = uri("https://jitpack.io") }
     }
 }
 
 rootProject.name = "GenStreamUI"
 include(":app")
+include(":moonlight")
