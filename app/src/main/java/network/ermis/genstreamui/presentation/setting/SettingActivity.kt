@@ -54,9 +54,64 @@ class SettingActivity : AppCompatActivity() {
     private fun setupRecyclerViews() {
         // Setup Right Items list
         binding.rvItems.layoutManager = LinearLayoutManager(this)
-        itemAdapter = SettingItemAdapter(emptyList()) { item, isEnabled ->
-            // Save when toggled
-            SettingManager.saveSettings(this, categories)
+        itemAdapter = SettingItemAdapter(emptyList()) { item, newValue ->
+            SettingManager.saveSetting(this, item, newValue)
+
+            if (item.id == "list_resolution") {
+                val valueStr = newValue as String
+                // Detect if native resolution
+                val isNativeRes = com.limelight.preferences.PreferenceConfiguration.isNativeResolution(
+                    valueStr.split("x")[0].toIntOrNull() ?: 0,
+                    valueStr.split("x")[1].toIntOrNull() ?: 0
+                )
+                if (isNativeRes) {
+                    com.limelight.utils.Dialog.displayDialog(this,
+                        resources.getString(com.limelight.R.string.title_native_res_dialog),
+                        resources.getString(com.limelight.R.string.text_native_res_dialog),
+                        false)
+                }
+
+                // Reset bitrate
+                val prefs = SettingManager.getPrefs(this)
+                val defaultBitrate = com.limelight.preferences.PreferenceConfiguration.getDefaultBitrate(
+                    valueStr,
+                    prefs.getString("list_fps", com.limelight.preferences.PreferenceConfiguration.DEFAULT_FPS)
+                )
+                prefs.edit().putInt("seekbar_bitrate_kbps", defaultBitrate).apply()
+                // Update bitrate item in memory if visible
+                categories.find { it.id == "category_basic_settings" }?.items?.find { it.id == "seekbar_bitrate_kbps" }?.value = defaultBitrate.toString()
+                itemAdapter.notifyDataSetChanged()
+            } else if (item.id == "list_fps") {
+                val valueStr = newValue as String
+                // Note: simplified native fps check - if it's not 30, 60, 90, 120 it's likely native, or if it matches display refresh rate
+                val fpsInt = valueStr.toIntOrNull() ?: 60
+                if (fpsInt != 30 && fpsInt != 60 && fpsInt != 90 && fpsInt != 120) {
+                    com.limelight.utils.Dialog.displayDialog(this,
+                        resources.getString(com.limelight.R.string.title_native_fps_dialog),
+                        resources.getString(com.limelight.R.string.text_native_res_dialog),
+                        false)
+                }
+
+                // Reset bitrate
+                val prefs = SettingManager.getPrefs(this)
+                val defaultBitrate = com.limelight.preferences.PreferenceConfiguration.getDefaultBitrate(
+                    prefs.getString("list_resolution", com.limelight.preferences.PreferenceConfiguration.DEFAULT_RESOLUTION),
+                    valueStr
+                )
+                prefs.edit().putInt("seekbar_bitrate_kbps", defaultBitrate).apply()
+                categories.find { it.id == "category_basic_settings" }?.items?.find { it.id == "seekbar_bitrate_kbps" }?.value = defaultBitrate.toString()
+                itemAdapter.notifyDataSetChanged()
+            } else if (item.id == "checkbox_unlock_fps") {
+                // HACK: Reinitialize to reflect new layout
+                binding.root.postDelayed({
+                    categories = SettingManager.loadSettings(this)
+                    // Keep the current category selected
+                    val currentCategoryIndex = (binding.rvCategories.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+                    if (currentCategoryIndex in categories.indices) {
+                        itemAdapter.updateItems(categories[currentCategoryIndex].items)
+                    }
+                }, 500)
+            }
         }
         binding.rvItems.adapter = itemAdapter
 
