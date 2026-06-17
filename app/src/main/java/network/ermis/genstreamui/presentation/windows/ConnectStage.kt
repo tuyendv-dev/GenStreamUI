@@ -7,6 +7,17 @@ package network.ermis.genstreamui.presentation.windows
 sealed interface ConnectStage {
     data object Idle : ConnectStage
 
+    /** Đang lấy danh sách gói thuê bao để xác định subscription mở phiên. */
+    data object ResolvingSubscription : ConnectStage
+
+    /**
+     * User có nhiều hơn 1 gói → cần chọn 1 gói để đi tiếp. UI hiện popup không thể tắt.
+     * Sau khi chọn, gọi [WindowsConnectViewModel.onSubscriptionChosen].
+     */
+    data class ChoosingSubscription(
+        val options: List<network.ermis.genstreamui.domain.model.Subscription>
+    ) : ConnectStage
+
     /** Stage 0 — tạo phiên. */
     data object CreatingSession : ConnectStage
 
@@ -23,6 +34,6 @@ sealed interface ConnectStage {
         val basePort: Int
     ) : ConnectStage
 
-    /** Thất bại ở bất kỳ stage nào. */
-    data class Failed(val message: String) : ConnectStage
+    /** Thất bại ở bất kỳ stage nào. [canRetry] = false khi thử lại vô nghĩa (vd: chưa có gói thuê bao). */
+    data class Failed(val message: String, val canRetry: Boolean = true) : ConnectStage
 }

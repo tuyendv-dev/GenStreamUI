@@ -32,6 +32,8 @@ import network.ermis.genstreamui.domain.usecase.session.HeartbeatUseCase
 import network.ermis.genstreamui.domain.usecase.session.LaunchGameUseCase
 import network.ermis.genstreamui.domain.usecase.session.StartSessionUseCase
 import network.ermis.genstreamui.domain.usecase.session.TokenAuthUseCase
+import network.ermis.genstreamui.domain.usecase.subscription.GetActiveSessionBySubscriptionUseCase
+import network.ermis.genstreamui.domain.usecase.subscription.GetUserSubscriptionsUseCase
 import javax.inject.Inject
 
 /**
@@ -51,7 +53,9 @@ class WindowsConnectViewModel @Inject constructor(
     private val endSession: EndSessionUseCase,
     private val getAgentToken: GetAgentTokenUseCase,
     private val launchGame: LaunchGameUseCase,
-    private val closeGame: CloseGameUseCase
+    private val closeGame: CloseGameUseCase,
+    private val getUserSubscriptions: GetUserSubscriptionsUseCase,
+    private val getActiveSessionBySubscription: GetActiveSessionBySubscriptionUseCase
 ) : ViewModel() {
 
     private val _stage = MutableStateFlow<ConnectStage>(ConnectStage.Idle)
@@ -60,12 +64,58 @@ class WindowsConnectViewModel @Inject constructor(
     private val deviceName: String = Build.MODEL ?: "Android"
     private var sessionId: Int? = null
     private var connectJob: Job? = null
+    private var resolveJob: Job? = null
     private var heartbeatJob: Job? = null
+
+    // Subscription đã chốt để mở phiên (auto khi có 1 gói, hoặc do user chọn khi có nhiều gói).
+    private var resolvedSubscriptionId: Int? = null
 
     // Play-Now: nếu [appId] > 0 thì sau khi Authorized sẽ launch game qua agent.
     private var platform: String = ""
     private var appId: Int = 0
     private var agentToken: AgentToken? = null
+
+    /**
+     * Điểm vào của màn: xác định subscription rồi mới connect.
+     * - 0 gói → Failed (chưa có gói thuê bao).
+     * - 1 gói → tự dùng id gói đó, connect ngay.
+     * - >1 gói → phát [ConnectStage.ChoosingSubscription] để UI hiện popup cho user chọn.
+     *
+     * [platform]/[appId] giữ cho cả luồng (Play-Now nếu appId > 0).
+     */
+    fun start(platform: String = "", appId: Int = 0) {
+        if (connectJob?.isActive == true || resolveJob?.isActive == true) return
+        this.platform = platform
+        this.appId = appId
+        resolveJob = viewModelScope.launch {
+            _stage.value = ConnectStage.ResolvingSubscription
+            getUserSubscriptions().collect { state ->
+                when (state) {
+                    is UiState.Success -> {
+                        val subs = state.data
+                        when {
+                            subs.isEmpty() -> fail("Bạn chưa có gói thuê bao nào", canRetry = false)
+                            subs.size == 1 -> connect(subs.first().id, platform, appId)
+                            else -> _stage.value = ConnectStage.ChoosingSubscription(subs)
+                        }
+                    }
+                    is UiState.Error -> fail(state.message)
+                    else -> Unit
+                }
+            }
+        }
+    }
+
+    /** User đã chọn 1 gói ở popup → chốt id và tiếp tục connect. */
+    fun onSubscriptionChosen(subscriptionId: Int) {
+        connect(subscriptionId, platform, appId)
+    }
+
+    /** Thử lại: nếu đã chốt subscription thì connect lại luôn, chưa thì resolve lại từ đầu. */
+    fun retry() {
+        val id = resolvedSubscriptionId
+        if (id != null) connect(id, platform, appId) else start(platform, appId)
+    }
 
     /**
      * Bắt đầu (hoặc thử lại) luồng kết nối cho [subscriptionId].
@@ -75,6 +125,7 @@ class WindowsConnectViewModel @Inject constructor(
         if (connectJob?.isActive == true) return
         this.platform = platform
         this.appId = appId
+        this.resolvedSubscriptionId = subscriptionId
         connectJob = viewModelScope.launch {
             _stage.value = ConnectStage.CreatingSession
 
@@ -128,10 +179,35 @@ class WindowsConnectViewModel @Inject constructor(
         }
     }
 
-    /** Stage 0. Trả [Session] nếu tạo phiên thành công, null (đã set Failed) nếu lỗi. */
+    /**
+     * Stage 0. Tạo phiên mới; nếu backend báo gói đã có phiên active (409 SESSION_INVALID_STATE)
+     * thì lấy lại chính phiên đó để tiếp tục connect (không coi là lỗi). Trả null (đã set Failed) nếu lỗi.
+     */
     private suspend fun startSessionOrNull(subscriptionId: Int): Session? {
         var session: Session? = null
+        var alreadyHasActiveSession = false
         startSession(subscriptionId).collect { state ->
+            when (state) {
+                is UiState.Success -> session = state.data
+                is UiState.Error ->
+                    if (ApiErrorCode.from(state.code) == ApiErrorCode.SESSION_INVALID_STATE) {
+                        // Gói đã có phiên đang chạy → lấy lại phiên đó ở bước sau, không fail.
+                        alreadyHasActiveSession = true
+                    } else {
+                        fail(state.message)
+                    }
+                else -> Unit
+            }
+        }
+        if (session != null) return session
+        if (alreadyHasActiveSession) return activeSessionOrNull(subscriptionId)
+        return null
+    }
+
+    /** Lấy phiên đang active của [subscriptionId] để tiếp tục connect. null (đã set Failed) nếu lỗi. */
+    private suspend fun activeSessionOrNull(subscriptionId: Int): Session? {
+        var session: Session? = null
+        getActiveSessionBySubscription(subscriptionId).collect { state ->
             when (state) {
                 is UiState.Success -> session = state.data
                 is UiState.Error -> fail(state.message)
@@ -184,9 +260,9 @@ class WindowsConnectViewModel @Inject constructor(
         }
     }
 
-    private fun fail(message: String) {
+    private fun fail(message: String, canRetry: Boolean = true) {
         heartbeatJob?.cancel()
-        _stage.value = ConnectStage.Failed(message)
+        _stage.value = ConnectStage.Failed(message, canRetry)
     }
 
     /**
@@ -194,6 +270,7 @@ class WindowsConnectViewModel @Inject constructor(
      * Chạy ngoài [viewModelScope] vì scope đã bị hủy khi rời màn.
      */
     fun cancelAndRelease() {
+        resolveJob?.cancel()
         connectJob?.cancel()
         heartbeatJob?.cancel()
         val id = sessionId ?: return

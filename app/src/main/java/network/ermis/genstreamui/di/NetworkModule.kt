@@ -11,6 +11,7 @@ import network.ermis.genstreamui.database.network.interceptor.TokenAuthenticator
 import network.ermis.genstreamui.database.network.service.AuthService
 import network.ermis.genstreamui.database.network.service.GameService
 import network.ermis.genstreamui.database.network.service.SessionsService
+import network.ermis.genstreamui.database.network.service.SubscriptionsService
 import network.ermis.genstreamui.database.network.service.UserService
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -39,6 +40,7 @@ object NetworkModule {
     ): OkHttpClient = OkHttpClient.Builder().apply {
         addInterceptor(authInterceptor)
         authenticator(tokenAuthenticator)
+        // Log HTTP (BODY) cho MỌI request của app — chỉ bật ở bản debug.
         if (BuildConfig.DEBUG) {
             addInterceptor(
                 HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
@@ -79,4 +81,9 @@ object NetworkModule {
     @Singleton
     fun provideSessionsService(retrofit: Retrofit): SessionsService =
         retrofit.create(SessionsService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideSubscriptionsService(retrofit: Retrofit): SubscriptionsService =
+        retrofit.create(SubscriptionsService::class.java)
 }

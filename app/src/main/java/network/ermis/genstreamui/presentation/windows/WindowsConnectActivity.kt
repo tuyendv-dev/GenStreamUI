@@ -45,10 +45,6 @@ class WindowsConnectActivity : AppCompatActivity() {
 
     @Inject lateinit var pinnedStore: PinnedServerCertStore
 
-    private val subscriptionId: Int by lazy {
-        intent.getIntExtra(EXTRA_SUBSCRIPTION_ID, DEFAULT_SUBSCRIPTION_ID)
-    }
-
     // Play-Now (tuỳ chọn): nếu appId > 0 thì sau khi kết nối sẽ mở sẵn game qua agent.
     private val platform: String by lazy { intent.getStringExtra(EXTRA_PLATFORM).orEmpty() }
     private val appId: Int by lazy { intent.getIntExtra(EXTRA_APP_ID, 0) }
@@ -63,6 +59,9 @@ class WindowsConnectActivity : AppCompatActivity() {
 
     // Sau khi đã mở stream/AppView, lần quay lại màn này sẽ tự đóng luôn (kết thúc phiên).
     private var finishOnReturn = false
+
+    // Popup chọn gói (khi user có nhiều hơn 1 subscription) — non-cancelable, giữ ref để tránh mở trùng.
+    private var subscriptionDialog: androidx.appcompat.app.AlertDialog? = null
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
@@ -92,10 +91,11 @@ class WindowsConnectActivity : AppCompatActivity() {
         )
 
         binding.btnBack.setOnClickListener { finish() }
-        binding.btnRetry.setOnClickListener { viewModel.connect(subscriptionId, platform, appId) }
+        binding.btnRetry.setOnClickListener { viewModel.retry() }
 
         observeStage()
-        viewModel.connect(subscriptionId, platform, appId)
+        // Subscription được xác định từ GET /users/me/subscriptions (auto nếu 1 gói, popup nếu nhiều).
+        viewModel.start(platform, appId)
     }
 
     private fun observeStage() {
@@ -107,8 +107,15 @@ class WindowsConnectActivity : AppCompatActivity() {
     }
 
     private fun render(stage: ConnectStage) {
+        // Đóng popup chọn gói nếu rời khỏi stage chọn (vd retry/đã chọn xong).
+        if (stage !is ConnectStage.ChoosingSubscription) dismissSubscriptionPicker()
+
         when (stage) {
             ConnectStage.Idle,
+            ConnectStage.ResolvingSubscription -> showProgress("Đang tải thông tin gói...", "")
+
+            is ConnectStage.ChoosingSubscription -> showSubscriptionPicker(stage.options)
+
             ConnectStage.CreatingSession -> showProgress("Đang tạo phiên...", "")
 
             is ConnectStage.WaitingForVm ->
@@ -120,7 +127,7 @@ class WindowsConnectActivity : AppCompatActivity() {
             is ConnectStage.Connected -> streamDesktopOnce(stage)
 
             is ConnectStage.Failed ->
-                showResult(title = "Kết nối thất bại", detail = stage.message, showRetry = true)
+                showResult(title = "Kết nối thất bại", detail = stage.message, showRetry = stage.canRetry)
         }
     }
 
@@ -196,6 +203,43 @@ class WindowsConnectActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Popup không thể tắt yêu cầu user chọn 1 trong các gói. Mỗi option hiển thị
+     * package_id + cpu_model + thời gian còn lại. Bấm "Xác nhận" → tiếp tục luồng connect.
+     */
+    private fun showSubscriptionPicker(options: List<network.ermis.genstreamui.domain.model.Subscription>) {
+        if (subscriptionDialog?.isShowing == true || options.isEmpty()) return
+
+        val labels = options.map { sub ->
+            "Gói #${sub.packageId} • ${sub.cpuModel.ifEmpty { "?" }} • Còn ${formatHours(sub.hoursRemaining)} giờ"
+        }.toTypedArray()
+        var selected = 0
+
+        subscriptionDialog = androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Chọn gói thuê bao")
+            .setCancelable(false)
+            .setSingleChoiceItems(labels, selected) { _, which -> selected = which }
+            .setPositiveButton("Xác nhận") { _, _ ->
+                viewModel.onSubscriptionChosen(options[selected].id)
+            }
+            .create()
+            .apply {
+                // Chặn nút Back để không tắt được popup.
+                setCanceledOnTouchOutside(false)
+                setOnKeyListener { _, keyCode, _ -> keyCode == android.view.KeyEvent.KEYCODE_BACK }
+                show()
+            }
+    }
+
+    private fun dismissSubscriptionPicker() {
+        subscriptionDialog?.dismiss()
+        subscriptionDialog = null
+    }
+
+    /** Bỏ phần thập phân thừa: 60.0 -> "60", 12.5 -> "12.5". */
+    private fun formatHours(hours: Double): String =
+        if (hours % 1.0 == 0.0) hours.toLong().toString() else hours.toString()
+
     private fun showProgress(title: String, detail: String) {
         binding.progressBar.visibility = View.VISIBLE
         binding.btnRetry.visibility = View.GONE
@@ -217,6 +261,7 @@ class WindowsConnectActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        dismissSubscriptionPicker()
         if (serviceBound) {
             unbindService(serviceConnection)
             serviceBound = false
@@ -225,9 +270,6 @@ class WindowsConnectActivity : AppCompatActivity() {
     }
 
     companion object {
-        /** Subscription dùng để mở phiên (POST /sessions). */
-        const val EXTRA_SUBSCRIPTION_ID = "extra_subscription_id"
-
         /** (Play-Now) platform của game cần mở qua agent, vd "steam". */
         const val EXTRA_PLATFORM = "extra_platform"
 
@@ -243,8 +285,5 @@ class WindowsConnectActivity : AppCompatActivity() {
         // Warm-up đăng ký host: ~20 lần × 3s = 60s (chờ Sunshine của VM lên).
         private const val MAX_REGISTER_ATTEMPTS = 20
         private const val REGISTER_RETRY_DELAY_MS = 3_000L
-
-        // TODO: thay bằng subscription active thật từ GET /users/me/subscriptions (§5).
-        private const val DEFAULT_SUBSCRIPTION_ID = 1
     }
 }
