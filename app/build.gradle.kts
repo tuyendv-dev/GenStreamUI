@@ -9,6 +9,15 @@ android {
     namespace = "network.ermis.genstreamui"
     compileSdk = 36
 
+    signingConfigs {
+        create("release") {
+            keyAlias = "key0"
+            keyPassword = "com.gen.play.io.cloud.phone"
+            storePassword = "com.gen.play.io.cloud.phone"
+            storeFile = File(projectDir, "src/key_store_app.jks")
+        }
+    }
+
     defaultConfig {
         applicationId = "network.ermis.genstreamui"
         minSdk = 24
@@ -31,6 +40,8 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
