@@ -58,6 +58,29 @@ class GameRepositoryImpl @Inject constructor(
     override suspend fun saveGame(game: Game) =
         gameDao.upsertAll(listOf(game.toEntity()))
 
+    override suspend fun searchGames(
+        q: String?,
+        category: String?,
+        platform: String?,
+        featured: Boolean?,
+        hot: Boolean?,
+        recommended: Boolean?,
+        page: Int?,
+        perPage: Int?
+    ) = gameService.searchGames(
+        q = q,
+        category = category,
+        platform = platform,
+        featured = featured,
+        hot = hot,
+        recommended = recommended,
+        page = page,
+        perPage = perPage
+    )
+
+    override suspend fun getGameCategories() =
+        gameService.getGameCategories()
+
     // region cache key
 
     private fun lang(): String = SharedPrefCommon.languageCode.ifEmpty { "en" }

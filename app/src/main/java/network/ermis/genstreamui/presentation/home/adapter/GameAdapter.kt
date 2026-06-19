@@ -21,12 +21,23 @@ import network.ermis.genstreamui.presentation.addScaleClickEffect
  * Cụm icon nền tảng (llPlatforms) hiện/ẩn theo [Game.platforms]. Giữ logic chặn focus DPAD cho TV.
  */
 class GameAdapter(
-    private val games: List<Game>,
+    games: List<Game>,
     private val onClick: (Game) -> Unit
 ) : RecyclerView.Adapter<GameAdapter.GameViewHolder>() {
 
+    // Backing list mutable để hỗ trợ load thêm trang (append) mà không phải tạo lại adapter.
+    private val games: MutableList<Game> = games.toMutableList()
+
     class GameViewHolder(val binding: ItemGameBinding) :
         RecyclerView.ViewHolder(binding.root)
+
+    /** Nối thêm game của trang kế (giữ nguyên vị trí scroll). Bỏ qua nếu rỗng. */
+    fun append(more: List<Game>) {
+        if (more.isEmpty()) return
+        val start = games.size
+        games.addAll(more)
+        notifyItemRangeInserted(start, more.size)
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GameViewHolder {
         val binding = ItemGameBinding.inflate(LayoutInflater.from(parent.context), parent, false)

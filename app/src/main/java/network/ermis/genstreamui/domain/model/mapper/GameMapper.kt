@@ -3,9 +3,11 @@ package network.ermis.genstreamui.domain.model.mapper
 import network.ermis.genstreamui.domain.model.Discovery
 import network.ermis.genstreamui.domain.model.DiscoverySection
 import network.ermis.genstreamui.domain.model.Game
+import network.ermis.genstreamui.domain.model.GameSearchResult
 import network.ermis.genstreamui.domain.model.dto.res.DiscoveryDataDTO
 import network.ermis.genstreamui.domain.model.dto.res.DiscoverySectionDTO
 import network.ermis.genstreamui.domain.model.dto.res.GameDTO
+import network.ermis.genstreamui.domain.model.dto.res.ResSearchGames
 
 /**
  * Map DTO mạng -> model core domain cho game/discovery. Đây là ranh giới data -> domain:
@@ -49,3 +51,14 @@ fun DiscoveryDataDTO.toDomain(): Discovery = Discovery(
     recommended = recommended?.map { it.toDomain() } ?: emptyList(),
     sections = sections?.map { it.toDomain() } ?: emptyList()
 )
+
+/** Map response search/filter -> model domain. [total] ưu tiên pagination.total, fallback số item. */
+fun ResSearchGames.toDomain(): GameSearchResult {
+    val games = data?.map { it.toDomain() } ?: emptyList()
+    return GameSearchResult(
+        games = games,
+        total = pagination?.total ?: games.size,
+        page = pagination?.page ?: 1,
+        totalPages = pagination?.totalPages ?: 1
+    )
+}

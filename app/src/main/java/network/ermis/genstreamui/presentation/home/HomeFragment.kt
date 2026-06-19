@@ -30,6 +30,7 @@ import network.ermis.genstreamui.presentation.addScaleClickEffect
 import network.ermis.genstreamui.presentation.device.DeviceActivity
 import network.ermis.genstreamui.presentation.home.adapter.HomePagerAdapter
 import network.ermis.genstreamui.presentation.profile.UserProfileActivity
+import network.ermis.genstreamui.presentation.search.SearchGameActivity
 import network.ermis.genstreamui.presentation.setting.SettingActivity
 import network.ermis.genstreamui.presentation.subscription.SubscriptionActivity
 import network.ermis.genstreamui.presentation.widget.setupStatusIcons
@@ -57,7 +58,10 @@ class HomeFragment : Fragment() {
 
         setupStatusIcons(
             binding = binding.statusIcons,
-            showSearch = true
+            showSearch = true,
+            onSearchClick = {
+                startActivity(Intent(requireContext(), SearchGameActivity::class.java))
+            }
         )
 
         setupViewPager()

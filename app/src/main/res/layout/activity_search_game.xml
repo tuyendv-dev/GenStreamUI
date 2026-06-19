@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_color">
+
+    <!-- Top bar: back + thanh search + icon filter -->
+    <LinearLayout
+        android:id="@+id/topBar"
+        android:layout_width="match_parent"
+        android:layout_height="78dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="6dp"
+            android:src="@drawable/ic_back"
+            app:tint="@color/white" />
+
+        <LinearLayout
+            android:id="@+id/searchBar"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_marginStart="12dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_search_bar"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="12dp">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_search"
+                app:tint="@color/text_secondary" />
+
+            <EditText
+                android:id="@+id/etSearch"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:background="@null"
+                android:hint="@string/search_games_hint"
+                android:imeOptions="actionSearch|flagNoExtractUi"
+                android:inputType="text"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_secondary"
+                android:textSize="14sp" />
+
+            <ImageView
+                android:id="@+id/btnClear"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginStart="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:src="@drawable/ic_close"
+                android:visibility="gone"
+                app:tint="@color/text_secondary" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/btnFilter"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_marginStart="12dp"
+            android:background="@drawable/bg_search_bar"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="11dp"
+            android:src="@drawable/ic_filter"
+            app:tint="@color/white" />
+    </LinearLayout>
+
+    <!-- Số lượng kết quả search (kèm progress khi đang tìm) -->
+    <LinearLayout
+        android:id="@+id/resultBar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="64dp"
+        android:paddingEnd="20dp"
+        app:layout_constraintEnd_toStartOf="@id/tvSelectedCategory"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/topBar">
+
+        <ProgressBar
+            android:id="@+id/pbSearching"
+            style="@style/Widget.AppCompat.ProgressBar"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginEnd="8dp"
+            android:indeterminate="true"
+            android:indeterminateTint="@color/text_primary"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/tvResultCount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.GenStream.Body"
+            tools:text="20 kết quả"
+            xmlns:tools="http://schemas.android.com/tools" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvSelectedCategory"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:layout_marginEnd="31dp"
+        android:textAppearance="@style/TextAppearance.GenStream.Body"
+        app:layout_constraintTop_toTopOf="@id/resultBar"
+        app:layout_constraintBottom_toBottomOf="@id/resultBar"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- Lưới game 4 cột -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvGames"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:paddingHorizontal="60dp"
+        android:paddingBottom="24dp"
+        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        app:spanCount="4"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/resultBar" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

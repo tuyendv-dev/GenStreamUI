@@ -66,6 +66,12 @@
             android:name=".presentation.subscription.SubscriptionActivity"
             android:screenOrientation="sensorLandscape"
             android:exported="false" />
+
+        <activity
+            android:name=".presentation.search.SearchGameActivity"
+            android:screenOrientation="sensorLandscape"
+            android:windowSoftInputMode="stateVisible|adjustResize"
+            android:exported="false" />
     </application>
 
 </manifest>

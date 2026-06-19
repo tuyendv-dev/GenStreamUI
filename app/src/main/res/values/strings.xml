@@ -1,7 +1,13 @@
 <resources>
-    <string name="app_name">GenStreamUI</string>
+    <string name="app_name">GenStream</string>
     <string name="verification_subtitle">Enter the code we sent to %1$s</string>
     <string name="reset_password_subtitle">Enter the code sent to %1$s and your new password</string>
     <string name="dialog_loading">Đang xử lý…</string>
     <string name="user_uid">UID: %1$d</string>
+    <string name="search_games_title">Tìm game</string>
+    <string name="search_games_hint">Tìm theo tên game…</string>
+    <string name="search_result_count">%1$d kết quả</string>
+    <string name="search_result_count_query">%1$d kết quả cho từ khoá \"%2$s\"</string>
+    <string name="search_searching_query">Tìm kiếm cho từ khoá \"%1$s\"</string>
+    <string name="search_filter_all">All</string>
 </resources>
