@@ -212,23 +212,28 @@ class WindowsConnectActivity : AppCompatActivity() {
 
         val labels = options.map { sub ->
             "Gói #${sub.packageId} • ${sub.cpuModel.ifEmpty { "?" }} • Còn ${formatHours(sub.hoursRemaining)} giờ"
-        }.toTypedArray()
-        var selected = 0
+        }
+
+        val dialogBinding = network.ermis.genstreamui.databinding.DialogSubscriptionBinding.inflate(layoutInflater)
+        val adapter = SubscriptionAdapter(labels, 0)
+        dialogBinding.rvSubscriptions.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
+        dialogBinding.rvSubscriptions.adapter = adapter
 
         subscriptionDialog = androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle("Chọn gói thuê bao")
+            .setView(dialogBinding.root)
             .setCancelable(false)
-            .setSingleChoiceItems(labels, selected) { _, which -> selected = which }
-            .setPositiveButton("Xác nhận") { _, _ ->
-                viewModel.onSubscriptionChosen(options[selected].id)
-            }
             .create()
             .apply {
-                // Chặn nút Back để không tắt được popup.
+                window?.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
                 setCanceledOnTouchOutside(false)
                 setOnKeyListener { _, keyCode, _ -> keyCode == android.view.KeyEvent.KEYCODE_BACK }
-                show()
             }
+
+        dialogBinding.btnConfirm.setOnClickListener {
+            viewModel.onSubscriptionChosen(options[adapter.getSelectedIndex()].id)
+        }
+
+        subscriptionDialog?.show()
     }
 
     private fun dismissSubscriptionPicker() {
