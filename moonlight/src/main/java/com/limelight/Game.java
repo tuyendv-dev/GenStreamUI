@@ -1311,6 +1311,53 @@ public class Game extends Activity implements SurfaceHolder.Callback,
         return (byte) modifierFlags;
     }
 
+    // ===== GenStream DEBUG: probe đầu vào để biết event tay cầm vật lý có tới Game không =====
+    // Lọc theo logcat tag "GamepadProbe". Nếu KHÔNG thấy log khi bấm tay cầm => event không tới
+    // được activity (vấn đề focus / window / device không nhận diện là controller). Nếu CÓ log mà
+    // game vẫn không phản hồi => event tới nhưng bị drop ở controllerHandler/đường gửi.
+    private static boolean isGamepadInputSource(int source) {
+        return (source & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD
+                || (source & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK
+                || (source & InputDevice.SOURCE_DPAD) == InputDevice.SOURCE_DPAD;
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        // Log MỌI key event (không lọc theo source) để bắt cả trường hợp nút X/Y/A/B
+        // được map thành SOURCE_KEYBOARD. Bỏ qua các phím âm lượng để đỡ nhiễu.
+        int kc = event.getKeyCode();
+        if (kc != KeyEvent.KEYCODE_VOLUME_UP && kc != KeyEvent.KEYCODE_VOLUME_DOWN) {
+            InputDevice dev = event.getDevice();
+            android.util.Log.i("GamepadProbe", "dispatchKeyEvent keyCode=" + kc
+                    + " (" + KeyEvent.keyCodeToString(kc) + ")"
+                    + " action=" + event.getAction()
+                    + " source=0x" + Integer.toHexString(event.getSource())
+                    + " deviceId=" + event.getDeviceId()
+                    + " devName=" + (dev != null ? dev.getName() : "null")
+                    + " kbType=" + (dev != null ? dev.getKeyboardType() : -1)
+                    + " isController=" + ControllerHandler.isGameControllerDevice(dev)
+                    + " focusedView=" + (getCurrentFocus() != null ? getCurrentFocus().getClass().getSimpleName() : "null"));
+        }
+        return super.dispatchKeyEvent(event);
+    }
+
+    @Override
+    public boolean dispatchGenericMotionEvent(MotionEvent event) {
+        if (isGamepadInputSource(event.getSource())) {
+            android.util.Log.i("GamepadProbe", "dispatchGenericMotionEvent action=" + event.getAction()
+                    + " source=0x" + Integer.toHexString(event.getSource())
+                    + " deviceId=" + event.getDeviceId()
+                    + " LX=" + event.getAxisValue(MotionEvent.AXIS_X)
+                    + " LY=" + event.getAxisValue(MotionEvent.AXIS_Y)
+                    + " HATX=" + event.getAxisValue(MotionEvent.AXIS_HAT_X)
+                    + " HATY=" + event.getAxisValue(MotionEvent.AXIS_HAT_Y)
+                    + " focusedView=" + (getCurrentFocus() != null ? getCurrentFocus().getClass().getSimpleName() : "null")
+                    + " grabbedInput=" + grabbedInput);
+        }
+        return super.dispatchGenericMotionEvent(event);
+    }
+    // ===== END GenStream DEBUG =====
+
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         return handleKeyDown(event) || super.onKeyDown(keyCode, event);
@@ -1783,7 +1830,10 @@ public class Game extends Activity implements SurfaceHolder.Callback,
         int eventSource = event.getSource();
         int deviceSources = event.getDevice() != null ? event.getDevice().getSources() : 0;
         if ((eventSource & InputDevice.SOURCE_CLASS_JOYSTICK) != 0) {
-            if (controllerHandler.handleMotionEvent(event)) {
+            boolean consumed = controllerHandler.handleMotionEvent(event);
+            android.util.Log.i("GamepadProbe", "handleMotionEvent JOYSTICK fromView=" + (view != null)
+                    + " controllerHandler.handleMotionEvent=" + consumed);
+            if (consumed) {
                 return true;
             }
         }

@@ -1,3 +1,8 @@
+import com.android.build.gradle.internal.api.BaseVariantOutputImpl
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -22,7 +27,7 @@ android {
         applicationId = "network.ermis.genstreamui"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1
+        versionCode = 13
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -54,6 +59,19 @@ android {
     buildFeatures {
         viewBinding = true
         buildConfig = true
+    }
+
+    // Đặt tên file APK output: <tên app>_v<versionName>(<versionCode>)_<yyyyMMdd>_<buildType>.apk
+    // Ví dụ: GenStreamUI_v1.0(12)_20260618_release.apk
+    val appName = "GenStream"
+    applicationVariants.all {
+        val variant = this
+        val buildDate = SimpleDateFormat("dd-MM-yyyy", Locale.US).format(Date())
+        variant.outputs.all {
+            val output = this as BaseVariantOutputImpl
+            output.outputFileName =
+                "${appName}_v${variant.versionName}(${variant.versionCode})_${buildDate}_${variant.buildType.name}.apk"
+        }
     }
 }
 

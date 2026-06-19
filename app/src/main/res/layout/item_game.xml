@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="4dp"
     android:layout_marginTop="4dp"
-    android:layout_marginBottom="12dp"
+    android:layout_marginBottom="10dp"
     android:clickable="true"
     android:focusable="true"
     android:foreground="@drawable/bg_view_selector_radius_12"
@@ -19,14 +19,15 @@
         android:padding="4dp"
         android:paddingBottom="16dp">
 
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/cvGameCover"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:scaleType="centerCrop"
             android:src="@drawable/image_4"
+            app:cardBackgroundColor="@android:color/transparent"
             app:cardCornerRadius="12dp"
             app:cardElevation="0dp"
+            app:strokeWidth="0dp"
             app:layout_constraintDimensionRatio="166:100"
             app:layout_constraintTop_toTopOf="parent">
 
@@ -37,21 +38,81 @@
                 android:scaleType="centerCrop"
                 android:src="@drawable/image_4"
                 app:layout_constraintTop_toTopOf="parent" />
-        </androidx.cardview.widget.CardView>
+
+            <LinearLayout
+                android:id="@+id/llPlatforms"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginBottom="4dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:layout_gravity="bottom">
+
+                <ImageView
+                    android:id="@+id/ivWindows"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:src="@drawable/ic_windows"
+                    app:tint="@color/white" />
+
+                <ImageView
+                    android:id="@+id/ivSteam"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_marginStart="4dp"
+                    android:src="@drawable/ic_steam" />
+
+                <ImageView
+                    android:id="@+id/ivXbox"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_marginStart="4dp"
+                    android:src="@drawable/ic_xbox_game" />
+
+                <ImageView
+                    android:id="@+id/ivGog"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_marginStart="4dp"
+                    android:src="@drawable/ic_gog_com" />
+
+                <ImageView
+                    android:id="@+id/ivEa"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_marginStart="4dp"
+                    android:src="@drawable/ic_ea_game" />
+
+                <ImageView
+                    android:id="@+id/ivBattle"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_marginStart="4dp"
+                    android:src="@drawable/ic_battle_game" />
+
+                <ImageView
+                    android:id="@+id/ivEpic"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:layout_marginStart="3dp"
+                    android:src="@drawable/ic_epic_game" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
         <TextView
             android:id="@+id/tvGameTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="8dp"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="10dp"
             android:ellipsize="end"
-            android:lines="2"
-            android:maxLines="2"
+            android:lines="1"
+            android:maxLines="1"
             android:text="The Witcher 3: Wild Hunt"
             android:textColor="@color/white"
             android:textSize="14sp"
-            android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/cvGameCover" />
@@ -67,73 +128,11 @@
             android:text="Slay monster/ Find Ciri...."
             android:textColor="@color/text_secondary"
             android:textSize="12sp"
+            android:layout_marginBottom="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvGameTitle" />
-
-        <LinearLayout
-            android:id="@+id/llPlatforms"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="8dp"
-            android:layout_marginTop="12dp"
-            android:layout_marginBottom="8dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvGameDesc">
-
-            <ImageView
-                android:id="@+id/ivWindows"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:src="@drawable/ic_windows"
-                app:tint="@color/white" />
-
-            <ImageView
-                android:id="@+id/ivSteam"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:layout_marginStart="8dp"
-                android:src="@drawable/ic_steam" />
-
-            <ImageView
-                android:id="@+id/ivXbox"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:layout_marginStart="8dp"
-                android:src="@drawable/ic_xbox_game" />
-
-            <ImageView
-                android:id="@+id/ivGog"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:layout_marginStart="8dp"
-                android:src="@drawable/ic_gog_com" />
-
-            <ImageView
-                android:id="@+id/ivEa"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:layout_marginStart="8dp"
-                android:src="@drawable/ic_ea_game" />
-
-            <ImageView
-                android:id="@+id/ivBattle"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:layout_marginStart="8dp"
-                android:src="@drawable/ic_battle_game" />
-
-            <ImageView
-                android:id="@+id/ivEpic"
-                android:layout_width="18dp"
-                android:layout_height="18dp"
-                android:layout_marginStart="4dp"
-                android:src="@drawable/ic_epic_game" />
-
-        </LinearLayout>
+            app:layout_constraintTop_toBottomOf="@id/tvGameTitle"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -32,7 +32,7 @@
             android:id="@+id/bannerSection"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="40dp"
+            android:layout_marginHorizontal="60dp"
             android:layout_marginTop="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -98,6 +98,7 @@
                     android:foreground="@drawable/bg_view_selector_radius_12"
                     android:nextFocusLeft="@id/mainBannerCard"
                     android:nextFocusRight="@id/cvTopSideBannerImage"
+                    app:cardBackgroundColor="@android:color/transparent"
                     app:cardCornerRadius="12dp"
                     app:cardElevation="0dp">
 
@@ -124,8 +125,7 @@
                             android:maxLines="1"
                             tools:text="Atomic Heart"
                             android:textColor="@color/white"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
+                            android:textSize="14sp" />
 
                         <TextView
                             android:id="@+id/tvTopBannerDesc"
@@ -133,8 +133,8 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
                             android:ellipsize="end"
-                            android:lines="2"
-                            android:maxLines="2"
+                            android:lines="1"
+                            android:maxLines="1"
                             tools:text="Stream game Recomendation"
                             android:textColor="@color/text_secondary"
                             android:textSize="12sp" />
@@ -152,6 +152,7 @@
                     android:foreground="@drawable/bg_view_selector_radius_12"
                     android:nextFocusLeft="@id/mainBannerCard"
                     android:nextFocusRight="@id/cvBottomSideBannerImage"
+                    app:cardBackgroundColor="@android:color/transparent"
                     app:cardCornerRadius="12dp"
                     app:cardElevation="0dp">
 
@@ -177,8 +178,7 @@
                             android:maxLines="1"
                             tools:text="Atomic Heart"
                             android:textColor="@color/white"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
+                            android:textSize="14sp" />
 
                         <TextView
                             android:id="@+id/tvBottomBannerDesc"
@@ -186,8 +186,8 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
                             android:ellipsize="end"
-                            android:lines="2"
-                            android:maxLines="2"
+                            android:lines="1"
+                            android:maxLines="1"
                             tools:text="Stream game Recomendation"
                             android:textColor="@color/text_secondary"
                             android:textSize="12sp" />

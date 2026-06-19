@@ -73,13 +73,11 @@
     </LinearLayout>
 
     <!-- Main Game Details (Left Section) -->
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/llGameDetails"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="54dp"
-        android:layout_marginEnd="54dp"
-        android:orientation="vertical"
+        android:layout_marginHorizontal="60dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -89,22 +87,28 @@
         <!-- Game Title -->
         <TextView
             android:id="@+id/tvGameTitle"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="Call Duty"
             android:textColor="@color/white"
             android:textSize="32sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            app:layout_constraintWidth_percent="0.6"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <!-- Subtitle/Description -->
         <TextView
             android:id="@+id/tvGameDesc"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:text="Unveil the Hidden Truth in Black Myth: Call Duty become the legend"
             android:textColor="@color/text_primary"
-            android:textSize="14sp"/>
+            android:textSize="14sp"
+            app:layout_constraintWidth_percent="0.6"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvGameTitle" />
 
         <!-- Platform Icons -->
         <LinearLayout
@@ -113,7 +117,9 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
             android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvGameDesc">
 
             <ImageView
                 android:id="@+id/ivWindows"
@@ -168,11 +174,14 @@
 
         <!-- Play now & More Buttons Row -->
         <LinearLayout
+            android:id="@+id/llButtons"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="52dp"
             android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/llPlatforms">
 
             <!-- Play Now Button -->
             <TextView
@@ -208,7 +217,7 @@
 
         </LinearLayout>
 
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Check Compatibility Button -->
     <TextView

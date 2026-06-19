@@ -42,7 +42,7 @@
                 android:id="@+id/tvBannerTitle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="40dp"
+                android:layout_marginHorizontal="60dp"
                 tools:text="Grand Theft Auto V"
                 android:textColor="@color/white"
                 android:textSize="20sp"
@@ -55,7 +55,7 @@
                 android:id="@+id/tvBannerDesc"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="40dp"
+                android:layout_marginHorizontal="60dp"
                 android:layout_marginTop="8dp"
                 tools:text="&quot;Grand Theft Auto V&quot; has become one of the most popular and influential games globally since it release in 2013, thanks to its rich content and outstanding game quality"
                 android:textColor="@color/text_primary"
@@ -68,7 +68,7 @@
                 android:id="@+id/ivWindows"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:layout_marginStart="40dp"
+                android:layout_marginStart="60dp"
                 android:layout_marginTop="17dp"
                 android:src="@drawable/ic_windows"
                 app:layout_constraintStart_toStartOf="parent"
@@ -83,7 +83,7 @@
                 android:clipChildren="false"
                 android:clipToPadding="false"
                 android:orientation="horizontal"
-                android:paddingHorizontal="32dp"
+                android:paddingHorizontal="52dp"
                 android:weightSum="5"
                 app:layout_constraintTop_toBottomOf="@id/ivWindows">
 
@@ -103,6 +103,7 @@
                     android:focusable="true"
                     android:foreground="@drawable/bg_view_image_selector_radius_12"
                     android:nextFocusLeft="@id/card1"
+                    app:cardBackgroundColor="@android:color/transparent"
                     app:cardCornerRadius="12dp"
                     app:cardElevation="0dp">
 
@@ -129,6 +130,7 @@
                     android:clickable="true"
                     android:focusable="true"
                     android:foreground="@drawable/bg_view_image_selector_radius_12"
+                    app:cardBackgroundColor="@android:color/transparent"
                     app:cardCornerRadius="12dp"
                     app:cardElevation="0dp">
 
@@ -155,6 +157,7 @@
                     android:clickable="true"
                     android:focusable="true"
                     android:foreground="@drawable/bg_view_image_selector_radius_12"
+                    app:cardBackgroundColor="@android:color/transparent"
                     app:cardCornerRadius="12dp"
                     app:cardElevation="0dp">
 
@@ -181,6 +184,7 @@
                     android:clickable="true"
                     android:focusable="true"
                     android:foreground="@drawable/bg_view_image_selector_radius_12"
+                    app:cardBackgroundColor="@android:color/transparent"
                     app:cardCornerRadius="12dp"
                     app:cardElevation="0dp">
 
@@ -208,6 +212,7 @@
                     android:focusable="true"
                     android:foreground="@drawable/bg_view_image_selector_radius_12"
                     android:nextFocusRight="@id/card5"
+                    app:cardBackgroundColor="@android:color/transparent"
                     app:cardCornerRadius="12dp"
                     app:cardElevation="0dp">
 
@@ -256,7 +261,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingHorizontal="40dp"
+        android:paddingHorizontal="60dp"
         android:paddingTop="64dp"
         android:paddingBottom="8dp"
         app:layout_constraintStart_toStartOf="parent"
@@ -268,16 +273,17 @@
             android:text="PC Games"
             android:textColor="@color/white"
             android:textSize="13sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:paddingHorizontal="10dp"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
             android:text="XGPU"
             android:textColor="@color/text_secondary"
             android:textSize="13sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:paddingHorizontal="10dp"/>
     </LinearLayout>
 
     <ImageView
