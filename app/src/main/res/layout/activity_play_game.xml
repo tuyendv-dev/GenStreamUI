@@ -54,17 +54,31 @@
             android:id="@+id/btnBack"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="4dp"
-            android:src="@drawable/ic_back"
-            app:tint="@color/white"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:clickable="true"
             android:focusable="false"
-            android:background="?attr/selectableItemBackgroundBorderless" />
+            android:padding="8dp"
+            android:src="@drawable/ic_back"
+            android:layout_marginStart="30dp"
+            app:tint="@color/white" />
 
-        <Space
+        <!-- Tên game ở topBar: ẩn (alpha 0) lúc đầu, hiện dần khi tvGameTitle bị cuộn che. -->
+        <TextView
+            android:id="@+id/tvTopBarTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1" />
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:alpha="0"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <Space
+            android:layout_width="8dp"
+            android:layout_height="wrap_content" />
 
         <include
             android:id="@+id/statusIcons"
@@ -73,10 +87,10 @@
     </LinearLayout>
 
     <!-- Main Game Details (Left Section) -->
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/llGameDetails"
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/nsvGameDetails"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_marginHorizontal="60dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -84,169 +98,376 @@
         app:layout_constraintTop_toBottomOf="@id/topBar"
         app:layout_constraintVertical_bias="0.4">
 
-        <!-- Game Title -->
-        <TextView
-            android:id="@+id/tvGameTitle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="Call Duty"
-            android:textColor="@color/white"
-            android:textSize="32sp"
-            android:textStyle="bold"
-            app:layout_constraintWidth_percent="0.6"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <!-- Subtitle/Description -->
-        <TextView
-            android:id="@+id/tvGameDesc"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Unveil the Hidden Truth in Black Myth: Call Duty become the legend"
-            android:textColor="@color/text_primary"
-            android:textSize="14sp"
-            app:layout_constraintWidth_percent="0.6"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvGameTitle" />
-
-        <!-- Platform Icons -->
         <LinearLayout
-            android:id="@+id/llPlatforms"
-            android:layout_width="wrap_content"
+            android:id="@+id/llGameDetails"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvGameDesc">
+            android:orientation="vertical"
+            android:paddingTop="0dp"
+            android:paddingBottom="100dp">
 
-            <ImageView
-                android:id="@+id/ivWindows"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:src="@drawable/ic_windows"
-                app:tint="@color/white" />
+            <!-- Header group: từ title đến Check Compatibility — luôn căn giữa theo chiều dọc trong 1 màn.
+                 minHeight được set runtime = chiều cao viewport (xem PlayGameActivity). -->
+            <LinearLayout
+                android:id="@+id/llHeaderGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="vertical"
+                android:paddingHorizontal="40dp"
+                android:paddingBottom="40dp">
 
-            <ImageView
-                android:id="@+id/ivSteam"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_marginStart="12dp"
-                android:src="@drawable/ic_steam" />
+                <!-- Title + mô tả ngắn: giới hạn bề rộng tối đa 60% parent (cột 60% + Space 40%). -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:baselineAligned="false"
+                    android:orientation="horizontal"
+                    android:weightSum="5">
 
-            <ImageView
-                android:id="@+id/ivXbox"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_marginStart="12dp"
-                android:src="@drawable/ic_xbox_game" />
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="3"
+                        android:orientation="vertical">
 
-            <ImageView
-                android:id="@+id/ivGog"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_marginStart="12dp"
-                android:src="@drawable/ic_gog_com" />
+                        <!-- Game Title -->
+                        <TextView
+                            android:id="@+id/tvGameTitle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Call Duty"
+                            android:textColor="@color/white"
+                            android:textSize="32sp"
+                            android:textStyle="bold" />
 
-            <ImageView
-                android:id="@+id/ivBattle"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_marginStart="12dp"
-                android:src="@drawable/ic_battle_game" />
+                        <!-- Subtitle/Description -->
+                        <TextView
+                            android:id="@+id/tvGameDesc"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:maxLines="2"
+                            android:ellipsize="end"
+                            android:text="Unveil the Hidden Truth in Black Myth: Call Duty become the legend"
+                            android:textColor="@color/text_primary"
+                            android:textSize="14sp" />
+                    </LinearLayout>
 
-            <ImageView
-                android:id="@+id/ivEa"
-                android:layout_width="22dp"
-                android:layout_height="22dp"
-                android:layout_marginStart="10dp"
-                android:src="@drawable/ic_ea_game" />
+                    <Space
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2" />
+                </LinearLayout>
 
-            <ImageView
-                android:id="@+id/ivEpic"
-                android:layout_width="22dp"
-                android:layout_height="22dp"
-                android:layout_marginStart="10dp"
-                android:src="@drawable/ic_epic_game" />
+                <!-- Platform Icons -->
+                <LinearLayout
+                    android:id="@+id/llPlatforms"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
-        </LinearLayout>
+                    <ImageView
+                        android:id="@+id/ivWindows"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_windows"
+                        app:tint="@color/white" />
 
-        <!-- Play now & More Buttons Row -->
-        <LinearLayout
-            android:id="@+id/llButtons"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="52dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/llPlatforms">
+                    <ImageView
+                        android:id="@+id/ivSteam"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginStart="12dp"
+                        android:src="@drawable/ic_steam" />
 
-            <!-- Play Now Button -->
-            <TextView
-                android:id="@+id/btnPlayNow"
-                android:layout_width="235dp"
-                android:layout_height="44dp"
-                android:background="@drawable/bg_button_play_now"
-                android:foreground="@drawable/bg_view_image_selector_radius_8"
-                android:gravity="center"
-                android:text="Play now"
-                android:textColor="@color/black"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:clickable="true"
-                android:focusable="true"
-                android:focusedByDefault="true" />
+                    <ImageView
+                        android:id="@+id/ivXbox"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginStart="12dp"
+                        android:src="@drawable/ic_xbox_game" />
 
-            <!-- More Button (...) -->
-            <TextView
-                android:id="@+id/btnMore"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
-                android:layout_marginStart="6dp"
+                    <ImageView
+                        android:id="@+id/ivGog"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginStart="12dp"
+                        android:src="@drawable/ic_gog_com" />
+
+                    <ImageView
+                        android:id="@+id/ivBattle"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginStart="12dp"
+                        android:src="@drawable/ic_battle_game" />
+
+                    <ImageView
+                        android:id="@+id/ivEa"
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:layout_marginStart="10dp"
+                        android:src="@drawable/ic_ea_game" />
+
+                    <ImageView
+                        android:id="@+id/ivEpic"
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:layout_marginStart="10dp"
+                        android:src="@drawable/ic_epic_game" />
+
+                </LinearLayout>
+
+                <!-- Play now & More Buttons Row -->
+                <LinearLayout
+                    android:id="@+id/llButtons"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="52dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <!-- Play Now Button -->
+                    <TextView
+                        android:id="@+id/btnPlayNow"
+                        android:layout_width="235dp"
+                        android:layout_height="44dp"
+                        android:background="@drawable/bg_button_play_now"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:focusedByDefault="true"
+                        android:foreground="@drawable/bg_view_image_selector_radius_8"
+                        android:gravity="center"
+                        android:text="Play now"
+                        android:textColor="@color/black"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <!-- More Button (...) -->
+                    <TextView
+                        android:id="@+id/btnMore"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:layout_marginStart="6dp"
+                        android:background="@drawable/bg_button_more"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="@drawable/bg_view_selector_radius_8"
+                        android:gravity="center"
+                        android:text="•••"
+                        android:textColor="@color/white"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+                <!-- Check Compatibility Button -->
+                <TextView
+                    android:id="@+id/btnCheckCompatibility"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="242dp"
+                    android:layout_marginTop="4dp"
+                    android:background="@drawable/bg_badge_compatibility"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="@drawable/bg_view_selector_radius_8"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="10dp"
+                    android:text="Check Compatibility"
+                    android:textColor="@color/white"
+                    android:textSize="14sp" />
+
+            </LinearLayout>
+            <!-- /Header group -->
+
+            <!-- Game info: Age Rating / Language / Developer / Release Date -->
+            <LinearLayout
+                android:id="@+id/llGameInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:layout_marginHorizontal="40dp"
+                android:padding="12dp"
                 android:background="@drawable/bg_button_more"
-                android:foreground="@drawable/bg_view_selector_radius_8"
-                android:gravity="center"
-                android:text="•••"
+                android:baselineAligned="false"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Age Rating:"
+                        android:textAppearance="@style/TextAppearance.GenStream.SecondaryBody" />
+
+                    <TextView
+                        android:id="@+id/tvAgeRating"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textAppearance="@style/TextAppearance.GenStream.Body" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="36dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginHorizontal="16dp"
+                    android:background="@color/text_secondary" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Language:"
+                        android:textAppearance="@style/TextAppearance.GenStream.SecondaryBody" />
+
+                    <TextView
+                        android:id="@+id/tvLanguage"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:textAppearance="@style/TextAppearance.GenStream.Body" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="36dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginHorizontal="16dp"
+                    android:background="@color/text_secondary" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Developer:"
+                        android:textAppearance="@style/TextAppearance.GenStream.SecondaryBody" />
+
+                    <TextView
+                        android:id="@+id/tvDeveloper"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:textAppearance="@style/TextAppearance.GenStream.Body" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="36dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginHorizontal="16dp"
+                    android:background="@color/text_secondary" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Release Date:"
+                        android:textAppearance="@style/TextAppearance.GenStream.SecondaryBody" />
+
+                    <TextView
+                        android:id="@+id/tvReleaseDate"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:textAppearance="@style/TextAppearance.GenStream.Body" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Video Gallery Title (Screenshots) -->
+            <TextView
+                android:id="@+id/tvVideoGalleryTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:text="Video Gallery"
                 android:textColor="@color/white"
-                android:textSize="14sp"
+                android:textSize="20sp"
                 android:textStyle="bold"
-                android:clickable="true"
-                android:focusable="true" />
+                android:layout_marginHorizontal="40dp"/>
+
+            <!-- Screenshots RecyclerView -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvScreenshots"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:layout_marginHorizontal="40dp"
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+            <!-- Game Introduction -->
+            <TextView
+                android:id="@+id/tvDescriptionTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:text="Game Introduction"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginHorizontal="40dp"/>
+
+            <TextView
+                android:id="@+id/tvGameFullDesc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:lineSpacingExtra="4dp"
+                android:textColor="@color/text_primary"
+                android:textSize="14sp"
+                android:layout_marginHorizontal="40dp"/>
+
+            <!-- Detailed description (HTML) -->
+            <WebView
+                android:id="@+id/wvDetailedDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:overScrollMode="never"
+                android:layout_marginHorizontal="40dp"/>
 
         </LinearLayout>
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <!-- Check Compatibility Button -->
-    <TextView
-        android:id="@+id/btnCheckCompatibility"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:layout_marginStart="242dp"
-        android:background="@drawable/bg_badge_compatibility"
-        android:foreground="@drawable/bg_view_selector_radius_8"
-        android:paddingHorizontal="16dp"
-        android:paddingVertical="10dp"
-        android:text="Check Compatibility"
-        android:textColor="@color/white"
-        android:textSize="14sp"
-        android:clickable="true"
-        android:focusable="true"
-        app:layout_constraintTop_toBottomOf="@id/llGameDetails"
-        app:layout_constraintStart_toStartOf="@id/llGameDetails"/>
+    </androidx.core.widget.NestedScrollView>
 
     <!-- Footer (matches homefragment footer structure) -->
     <ImageView
-        android:visibility="gone"
         android:id="@+id/footer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="20dp"
         android:layout_marginBottom="16dp"
         android:src="@drawable/ic_footer_group"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 

@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.doOnLayout
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -59,6 +60,18 @@ class PlayGameActivity : AppCompatActivity() {
         // Back navigation
         binding.btnBack.setOnClickListener {
             finish()
+        }
+
+        // Nhóm header (title → Check Compatibility) cao tối thiểu = 1 màn để luôn căn giữa theo chiều dọc;
+        // phần nội dung phía dưới chỉ hiện khi người dùng vuốt lên.
+        binding.nsvGameDetails.doOnLayout {
+            binding.llHeaderGroup.minimumHeight = it.height
+        }
+
+        // Tên game ở topBar hiện dần khi tvGameTitle bị cuộn che; artwork blur dần khi header trôi hết.
+        binding.nsvGameDetails.setOnScrollChangeListener { _, _, scrollY, _, _ ->
+            updateTopBarTitleAlpha()
+            updateArtworkBlur(scrollY)
         }
 
         // Pre-zoom artwork; animation zoom-out sẽ chạy khi ảnh load xong (xem bindGame).
@@ -157,15 +170,165 @@ class PlayGameActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Nạp HTML detailed_description vào WebView. Bọc CSS để chữ trắng/nền trong suốt hợp theme tối
+     * và ảnh/video co theo bề ngang; cho video tự phát (muted) không cần chạm.
+     */
+    @android.annotation.SuppressLint("SetJavaScriptEnabled")
+    private fun bindDetailedDescription(html: String) {
+        val web = binding.wvDetailedDescription
+        web.settings.javaScriptEnabled = true
+        web.settings.mediaPlaybackRequiresUserGesture = false
+        web.settings.loadWithOverviewMode = true
+        web.settings.useWideViewPort = false
+        web.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+        web.isVerticalScrollBarEnabled = false
+
+        val document = """
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1">
+              <style>
+                body { margin:0; padding:0; background:transparent; color:#FFFFFF;
+                       font-family:sans-serif; font-size:14px; line-height:1.6; word-wrap:break-word; }
+                img, video { max-width:100%; height:auto; border-radius:8px; }
+                a { color:#4DA3FF; }
+                h1, h2 { color:#FFFFFF; }
+              </style>
+            </head>
+            <body>$html</body>
+            </html>
+        """.trimIndent()
+
+        web.loadDataWithBaseURL(
+            "https://store.steampowered.com",
+            document,
+            "text/html",
+            "UTF-8",
+            null
+        )
+    }
+
+    /**
+     * Cập nhật độ mờ tên game ở topBar theo mức tvGameTitle bị topBar che:
+     * chưa che -> alpha 0; che dần -> tăng dần; che hết (qua hết chiều cao title) -> alpha 1.
+     */
+    private fun updateTopBarTitleAlpha() {
+        val titleLoc = IntArray(2)
+        binding.tvGameTitle.getLocationInWindow(titleLoc)
+        val barLoc = IntArray(2)
+        binding.topBar.getLocationInWindow(barLoc)
+
+        val titleBottom = titleLoc[1] + binding.tvGameTitle.height
+        val barBottom = barLoc[1] + binding.topBar.height
+        val fadeDistance = binding.tvGameTitle.height.coerceAtLeast(1).toFloat()
+
+        // barBottom - titleBottom: dương dần khi title trôi lên dưới topBar.
+        val alpha = ((barBottom - titleBottom) / fadeDistance).coerceIn(0f, 1f)
+        binding.tvTopBarTitle.alpha = alpha
+    }
+
+    /**
+     * Blur artwork nền: bắt đầu khi [llHeaderGroup] đã bị cuộn hết khỏi màn (scrollY > đáy header),
+     * tăng dần tới [MAX_BLUR_RADIUS]. Chỉ áp dụng từ API 31 (RenderEffect); thấp hơn thì bỏ qua.
+     */
+    private fun updateArtworkBlur(scrollY: Int) {
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) return
+
+        val over = (scrollY - binding.llHeaderGroup.bottom).coerceAtLeast(0).toFloat()
+        val radius = (over / BLUR_FULL_DISTANCE_PX).coerceIn(0f, 1f) * MAX_BLUR_RADIUS
+        binding.flGameArtwork.setRenderEffect(
+            if (radius > 0f) {
+                android.graphics.RenderEffect.createBlurEffect(
+                    radius, radius, android.graphics.Shader.TileMode.CLAMP
+                )
+            } else {
+                null
+            }
+        )
+    }
+
+    /** Bind cụm thông tin Age Rating / Language / Developer / Release Date. */
+    private fun bindGameInfo(game: Game) {
+        binding.tvAgeRating.text = if (game.requiredAge > 0) game.requiredAge.toString() else "—"
+
+        // supported_languages là HTML + nhiều ngôn ngữ; lấy ngôn ngữ đầu, bỏ tag.
+        val language = game.supportedLanguages
+            .substringBefore(",")
+            .replace(Regex("<[^>]*>"), "")
+            .trim()
+        binding.tvLanguage.text = language.ifBlank { "—" }
+
+        binding.tvDeveloper.text =
+            game.developers.firstOrNull()?.takeIf { it.isNotBlank() }
+                ?: game.publisher.ifBlank { "—" }
+
+        binding.tvReleaseDate.text = game.releaseDateText.ifBlank {
+            if (game.releaseYear > 0) game.releaseYear.toString() else "—"
+        }
+    }
+
     /** Bind dữ liệu game vào UI (title, mô tả, ảnh artwork). */
     private fun bindGame(game: Game) {
         currentGame = game
         binding.tvGameTitle.text = game.title
+        binding.tvTopBarTitle.text = game.title
         binding.tvGameDesc.text = game.getShortDescriptionExt()
+
+        bindGameInfo(game)
+
+        if (game.description.isNotBlank()) {
+            binding.tvDescriptionTitle.visibility = android.view.View.VISIBLE
+            binding.tvGameFullDesc.visibility = android.view.View.VISIBLE
+            binding.tvGameFullDesc.text = game.description
+        } else {
+            binding.tvDescriptionTitle.visibility = android.view.View.GONE
+            binding.tvGameFullDesc.visibility = android.view.View.GONE
+        }
+
+        if (game.detailedDescription.isNotBlank()) {
+            binding.wvDetailedDescription.visibility = android.view.View.VISIBLE
+            bindDetailedDescription(game.detailedDescription)
+        } else {
+            binding.wvDetailedDescription.visibility = android.view.View.GONE
+        }
+
+        if (game.screenshots.isNotEmpty()) {
+            binding.tvVideoGalleryTitle.visibility = android.view.View.VISIBLE
+            binding.rvScreenshots.visibility = android.view.View.VISIBLE
+            binding.rvScreenshots.adapter = ScreenshotAdapter(game.screenshots)
+        } else {
+            binding.tvVideoGalleryTitle.visibility = android.view.View.GONE
+            binding.rvScreenshots.visibility = android.view.View.GONE
+        }
 
         binding.ivGameArtwork.loadCover(game.getGameBackground()) { zoomOutArtwork() }
 
         bindPlatforms(game.platforms)
+
+        // Vào màn -> luôn cuộn lên đầu (tránh RecyclerView con kéo focus làm lệch vị trí).
+        binding.nsvGameDetails.post { binding.nsvGameDetails.scrollTo(0, 0) }
+    }
+
+    private inner class ScreenshotAdapter(private val items: List<String>) :
+        androidx.recyclerview.widget.RecyclerView.Adapter<ScreenshotAdapter.ViewHolder>() {
+
+        inner class ViewHolder(val view: android.view.View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(view) {
+            val ivScreenshot: android.widget.ImageView = view.findViewById(network.ermis.genstreamui.R.id.ivScreenshot)
+        }
+
+        override fun onCreateViewHolder(parent: android.view.ViewGroup, viewType: Int): ViewHolder {
+            val view = layoutInflater.inflate(network.ermis.genstreamui.R.layout.item_screenshot, parent, false)
+            return ViewHolder(view)
+        }
+
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+            holder.ivScreenshot.loadCover(items[position])
+        }
+
+        override fun getItemCount() = items.size
     }
 
     /** Mở WindowsConnectActivity ở chế độ Play Now (stream thẳng vào game, không qua lưới AppView). */
@@ -221,5 +384,11 @@ class PlayGameActivity : AppCompatActivity() {
 
         /** Game slug của game được chọn; rỗng nếu mở không gắn game cụ thể. */
         const val EXTRA_GAME_SLUG = "extra_game_slug"
+
+        /** Bán kính blur tối đa (px) cho artwork nền khi cuộn quá header. */
+        private const val MAX_BLUR_RADIUS = 28f
+
+        /** Quãng cuộn (px) tính từ lúc header trôi hết để blur đạt tối đa. */
+        private const val BLUR_FULL_DISTANCE_PX = 400f
     }
 }

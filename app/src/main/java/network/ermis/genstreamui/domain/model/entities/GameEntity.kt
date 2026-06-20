@@ -2,6 +2,7 @@ package network.ermis.genstreamui.domain.model.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import network.ermis.genstreamui.domain.model.GameTrailer
 
 /**
  * Entity Room lưu chi tiết một game — bảng "kho game" dùng chung cho discovery và browse.
@@ -17,6 +18,7 @@ data class GameEntity(
     val description: String = "",
     val tagline: String = "",
     val shortDescription: String = "",
+    val detailedDescription: String = "",
     val coverImageUrl: String = "",
     val mainCapsule: String = "",
     val portraitImage: String = "",
@@ -26,9 +28,14 @@ data class GameEntity(
     val backgroundImage: String = "",
     val trailerUrl: String = "",
     val screenshots: List<String> = emptyList(),
+    val trailers: List<GameTrailer> = emptyList(),
     val categories: List<String> = emptyList(),
     val platforms: List<String> = emptyList(),
     val publisher: String = "",
+    val developers: List<String> = emptyList(),
+    val requiredAge: Int = 0,
+    val supportedLanguages: String = "",
+    val releaseDateText: String = "",
     val releaseYear: Int = 0,
     val featured: Boolean = false,
     val hot: Boolean = false,

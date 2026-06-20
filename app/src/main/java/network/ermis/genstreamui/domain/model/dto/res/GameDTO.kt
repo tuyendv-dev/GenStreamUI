@@ -16,6 +16,8 @@ data class GameDTO(
     val tagline: String? = null,
     @SerializedName("short_description")
     val shortDescription: String? = null,
+    @SerializedName("detailed_description")
+    val detailedDescription: String? = null,
     @SerializedName("cover_image_url")
     val coverImageUrl: String? = null,
     @SerializedName("main_capsule")
@@ -33,9 +35,17 @@ data class GameDTO(
     @SerializedName("trailer_url")
     val trailerUrl: String? = null,
     val screenshots: List<String>? = null,
+    val trailers: List<GameTrailerDTO>? = null,
     val categories: List<String>? = null,
     val platforms: List<String>? = null,
     val publisher: String? = null,
+    val developers: List<String>? = null,
+    @SerializedName("required_age")
+    val requiredAge: Int? = null,
+    @SerializedName("supported_languages")
+    val supportedLanguages: String? = null,
+    @SerializedName("release_date_text")
+    val releaseDateText: String? = null,
     @SerializedName("release_year")
     val releaseYear: Int? = null,
     val featured: Boolean? = null,
