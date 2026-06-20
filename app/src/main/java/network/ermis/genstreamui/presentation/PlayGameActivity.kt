@@ -267,30 +267,60 @@ class PlayGameActivity : AppCompatActivity() {
         )
     }
 
-    /** Bind cụm thông tin Age Rating / Language / Developer / Release Date. */
+    /**
+     * Bind cụm thông tin Age Rating / Language / Developer / Release Date. Cụm nào không có dữ liệu
+     * thì ẩn hẳn cột đó; divider giữa 2 cột chỉ hiện khi cả 2 phía đều còn cột hiển thị.
+     */
     private fun bindGameInfo(game: Game) {
-        binding.tvAgeRating.text = if (game.requiredAge > 0) game.requiredAge.toString() else "—"
+        // Age rating: chỉ có khi > 0.
+        val ageText = if (game.requiredAge > 0) game.requiredAge.toString() else ""
+        binding.tvAgeRating.text = ageText
 
         // supported_languages là HTML + nhiều ngôn ngữ cách nhau bằng dấu phẩy; bỏ tag, tách danh sách.
-        // Hiển thị ngôn ngữ đầu + "+N" với N = số ngôn ngữ còn lại (nếu có).
+        // Hiển thị ngôn ngữ đầu + "N+" với N = số ngôn ngữ còn lại (nếu có).
         val languages = game.supportedLanguages
             .replace(Regex("<[^>]*>"), "")
             .split(",")
             .map { it.trim() }
             .filter { it.isNotBlank() }
-        binding.tvLanguage.text = when {
-            languages.isEmpty() -> "—"
+        val languageText = when {
+            languages.isEmpty() -> ""
             languages.size == 1 -> languages.first()
             else -> "${languages.first()} ${languages.size - 1}+"
         }
+        binding.tvLanguage.text = languageText
 
-        binding.tvDeveloper.text =
-            game.developers.firstOrNull()?.takeIf { it.isNotBlank() }
-                ?: game.publisher.ifBlank { "—" }
+        val developerText = game.developers.firstOrNull()?.takeIf { it.isNotBlank() }
+            ?: game.publisher
+        binding.tvDeveloper.text = developerText
 
-        binding.tvReleaseDate.text = game.releaseDateText.ifBlank {
-            if (game.releaseYear > 0) game.releaseYear.toString() else "—"
+        val releaseText = game.releaseDateText.ifBlank {
+            if (game.releaseYear > 0) game.releaseYear.toString() else ""
         }
+        binding.tvReleaseDate.text = releaseText
+
+        // Ẩn cột không có dữ liệu.
+        val visible = booleanArrayOf(
+            ageText.isNotBlank(),
+            languageText.isNotBlank(),
+            developerText.isNotBlank(),
+            releaseText.isNotBlank()
+        )
+        val gone = android.view.View.GONE
+        val show = android.view.View.VISIBLE
+        binding.llAgeRating.visibility = if (visible[0]) show else gone
+        binding.llLanguage.visibility = if (visible[1]) show else gone
+        binding.llDeveloper.visibility = if (visible[2]) show else gone
+        binding.llReleaseDate.visibility = if (visible[3]) show else gone
+
+        // Divider thứ i hiện khi cột i hiển thị VÀ còn ít nhất 1 cột phía sau hiển thị.
+        fun anyAfter(i: Int) = (i + 1..3).any { visible[it] }
+        binding.vDivider1.visibility = if (visible[0] && anyAfter(0)) show else gone
+        binding.vDivider2.visibility = if (visible[1] && anyAfter(1)) show else gone
+        binding.vDivider3.visibility = if (visible[2] && anyAfter(2)) show else gone
+
+        // Không cột nào có dữ liệu -> ẩn luôn cả khung (tránh ô nền trống).
+        binding.llGameInfo.visibility = if (visible.any { it }) show else gone
     }
 
     /** Bind dữ liệu game vào UI (title, mô tả, ảnh artwork). */
@@ -334,7 +364,11 @@ class PlayGameActivity : AppCompatActivity() {
 
         if (game.legalNotice.isNotBlank()) {
             binding.tvLegalNotice.visibility = android.view.View.VISIBLE
-            binding.tvLegalNotice.text = game.legalNotice
+            // legal_notice có thể chứa thẻ HTML (<br>, ...) -> render HTML thay vì hiện text thô.
+            binding.tvLegalNotice.text = androidx.core.text.HtmlCompat.fromHtml(
+                game.legalNotice,
+                androidx.core.text.HtmlCompat.FROM_HTML_MODE_COMPACT
+            )
         } else {
             binding.tvLegalNotice.visibility = android.view.View.GONE
         }

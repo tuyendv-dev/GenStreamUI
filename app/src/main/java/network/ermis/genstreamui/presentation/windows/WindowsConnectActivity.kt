@@ -256,6 +256,8 @@ class WindowsConnectActivity : AppCompatActivity() {
         binding.btnRetry.visibility = View.GONE
         binding.tvStatus.text = title
         binding.tvDetail.text = detail
+        // Đang chờ VM/kết nối → giữ màn hình sáng để app không bị đẩy nền + kill (reset đếm).
+        setKeepScreenOn(true)
     }
 
     private fun showResult(title: String, detail: String, showRetry: Boolean) {
@@ -263,6 +265,16 @@ class WindowsConnectActivity : AppCompatActivity() {
         binding.btnRetry.visibility = if (showRetry) View.VISIBLE else View.GONE
         binding.tvStatus.text = title
         binding.tvDetail.text = detail
+        // Xong/thất bại → gỡ giữ sáng.
+        setKeepScreenOn(false)
+    }
+
+    private fun setKeepScreenOn(on: Boolean) {
+        if (on) {
+            window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        } else {
+            window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
     }
 
     override fun onResume() {
@@ -272,6 +284,7 @@ class WindowsConnectActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        setKeepScreenOn(false)
         dismissSubscriptionPicker()
         if (serviceBound) {
             unbindService(serviceConnection)

@@ -107,8 +107,13 @@ class SearchGameActivity : AppCompatActivity() {
             searchHandler.removeCallbacks(searchRunnable)
             searchHandler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_MS)
         }
-        // Icon clear -> xoá hết text.
-        binding.btnClear.setOnClickListener { binding.etSearch.text?.clear() }
+        // Icon clear -> xoá hết text nhưng GIỮ focus + bàn phím ảo (không ẩn).
+        binding.btnClear.setOnClickListener {
+            binding.etSearch.text?.clear()
+            binding.etSearch.requestFocus()
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.showSoftInput(binding.etSearch, InputMethodManager.SHOW_IMPLICIT)
+        }
         // Bấm "Search" trên bàn phím ảo -> search ngay (huỷ debounce đang chờ).
         binding.etSearch.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {

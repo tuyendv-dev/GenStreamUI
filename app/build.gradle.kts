@@ -27,7 +27,7 @@ android {
         applicationId = "network.ermis.genstreamui"
         minSdk = 24
         targetSdk = 36
-        versionCode = 14
+        versionCode = 15
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
