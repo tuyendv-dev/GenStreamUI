@@ -16,4 +16,19 @@
         app:hide_on_touch="true"
         app:show_timeout="2500" />
 
+    <!-- Overlay: loading hiển thị khi video chưa sẵn sàng; ẩn khi player READY. -->
+    <FrameLayout
+        android:id="@+id/loadingOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ProgressBar
+            android:id="@+id/progressLoading"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center"
+            android:indeterminateTint="@color/white" />
+
+    </FrameLayout>
+
 </FrameLayout>

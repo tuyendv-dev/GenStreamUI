@@ -35,13 +35,21 @@ class PreviewMediaActivity : AppCompatActivity() {
     private var thumbs: List<String> = emptyList()
     private var isVideo: BooleanArray = BooleanArray(0)
 
-    private var player: ExoPlayer? = null
+    // 1 ExoPlayer cho mỗi trang video (key = vị trí) — giữ nguyên trạng thái phát khi vuốt qua lại,
+    // không load lại từ đầu. Tạo lazy, giải phóng tất cả ở onDestroy.
+    private val players = HashMap<Int, ExoPlayer>()
+
+    // Player của trang video đang hiển thị.
+    private var activePlayer: ExoPlayer? = null
 
     // Trang video đang gắn player; nhả ra khi rời trang để tránh 2 PlayerView giữ chung 1 player.
     private var attachedPlayerView: PlayerView? = null
 
-    // Tắt tiếng mặc định (giống preview gallery thường thấy); người dùng bật lại bằng nút mute.
-    private var muted = true
+    // Holder video đang hiển thị, để ẩn overlay thumbnail/loading khi player READY.
+    private var attachedHolder: MediaAdapter.VideoViewHolder? = null
+
+    // Mặc định bật tiếng; người dùng tắt/bật lại bằng nút mute.
+    private var muted = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -109,18 +117,31 @@ class PreviewMediaActivity : AppCompatActivity() {
         }
     }
 
-    /** Lấy ExoPlayer dùng chung (tạo lazy lần đầu chạm tới video). */
-    private fun obtainPlayer(): ExoPlayer {
-        return player ?: ExoPlayer.Builder(this).build().also {
-            it.repeatMode = Player.REPEAT_MODE_ONE
-            it.volume = if (muted) 0f else 1f
-            player = it
+    /**
+     * Lấy ExoPlayer cho trang video [position] — tạo + prepare lần đầu rồi cache lại, các lần sau
+     * trả về player cũ (giữ nguyên vị trí phát/buffer). Listener ẩn overlay khi player này READY.
+     */
+    private fun obtainPlayerFor(position: Int): ExoPlayer {
+        return players[position] ?: ExoPlayer.Builder(this).build().also { exo ->
+            exo.repeatMode = Player.REPEAT_MODE_ONE
+            exo.volume = if (muted) 0f else 1f
+            exo.setMediaItem(MediaItem.fromUri(urls[position]))
+            exo.prepare()
+            // Video sẵn sàng -> ẩn overlay (chỉ khi đây đúng là trang đang hiển thị).
+            exo.addListener(object : Player.Listener {
+                override fun onPlaybackStateChanged(playbackState: Int) {
+                    if (playbackState == Player.STATE_READY && activePlayer === exo) {
+                        attachedHolder?.loadingOverlay?.visibility = android.view.View.GONE
+                    }
+                }
+            })
+            players[position] = exo
         }
     }
 
     /**
-     * Gắn player vào trang [position] nếu là video (chuẩn bị + phát), ngược lại nhả player khỏi
-     * PlayerView trang cũ và tạm dừng. Holder có thể chưa sẵn -> post lại 1 lần.
+     * Gắn player của trang [position] vào PlayerView của trang đó (resume từ trạng thái đã lưu),
+     * tạm dừng player trang trước. Holder có thể chưa sẵn -> post lại 1 lần.
      */
     private fun bindPlayerToPage(position: Int) {
         val rv = binding.viewPager.getChildAt(0) as? RecyclerView ?: return
@@ -130,20 +151,29 @@ class PreviewMediaActivity : AppCompatActivity() {
             return
         }
 
-        // Nhả player khỏi trang trước đó.
+        // Tạm dừng + nhả player khỏi trang trước đó (vẫn giữ player trong cache để resume sau).
+        activePlayer?.playWhenReady = false
         attachedPlayerView?.player = null
         attachedPlayerView = null
+        attachedHolder = null
 
         if (holder is MediaAdapter.VideoViewHolder) {
-            val exo = obtainPlayer()
-            exo.setMediaItem(MediaItem.fromUri(urls[position]))
-            exo.prepare()
-            exo.playWhenReady = true
+            val exo = obtainPlayerFor(position)
+            activePlayer = exo
+            attachedHolder = holder
             holder.playerView.player = exo
             attachedPlayerView = holder.playerView
+
+            // Đã READY (quay lại trang) -> ẩn overlay ngay; chưa thì hiện thumbnail + loading.
+            holder.loadingOverlay.visibility =
+                if (exo.playbackState == Player.STATE_READY) android.view.View.GONE
+                else android.view.View.VISIBLE
+
+            exo.volume = if (muted) 0f else 1f
+            // Không tự phát: người dùng phải bấm play. Quay lại trang giữ nguyên trạng thái pause.
             wireMuteButton(holder.playerView, exo)
         } else {
-            player?.playWhenReady = false
+            activePlayer = null
         }
     }
 
@@ -164,22 +194,17 @@ class PreviewMediaActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-        player?.playWhenReady = false
+        activePlayer?.playWhenReady = false
     }
 
-    override fun onResume() {
-        super.onResume()
-        // Tiếp tục phát nếu trang hiện tại là video.
-        if (urls.isNotEmpty() && isVideo.getOrElse(binding.viewPager.currentItem) { false }) {
-            player?.playWhenReady = true
-        }
-    }
+    // Không tự phát lại khi quay lại app — người dùng tự bấm play (giữ nguyên trạng thái pause).
 
     override fun onDestroy() {
         super.onDestroy()
         attachedPlayerView?.player = null
-        player?.release()
-        player = null
+        players.values.forEach { it.release() }
+        players.clear()
+        activePlayer = null
     }
 
     /** Adapter ViewPager2: video dùng PlayerView (item_preview_video), ảnh dùng ImageView. */
@@ -190,6 +215,7 @@ class PreviewMediaActivity : AppCompatActivity() {
 
         inner class VideoViewHolder(view: android.view.View) : RecyclerView.ViewHolder(view) {
             val playerView: PlayerView = view.findViewById(R.id.playerView)
+            val loadingOverlay: android.view.View = view.findViewById(R.id.loadingOverlay)
         }
 
         inner class ImageViewHolder(view: android.view.View) : RecyclerView.ViewHolder(view) {
@@ -208,7 +234,11 @@ class PreviewMediaActivity : AppCompatActivity() {
 
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
             when (holder) {
-                is VideoViewHolder -> holder.playerView.useController = true
+                is VideoViewHolder -> {
+                    holder.playerView.useController = true
+                    // Loading hiển thị tới khi player READY (xem obtainPlayerFor listener).
+                    holder.loadingOverlay.visibility = android.view.View.VISIBLE
+                }
                 is ImageViewHolder ->
                     Glide.with(holder.itemView)
                         .load(urls[position])

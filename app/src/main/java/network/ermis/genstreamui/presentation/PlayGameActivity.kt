@@ -320,8 +320,8 @@ class PlayGameActivity : AppCompatActivity() {
             binding.wvDetailedDescription.visibility = android.view.View.GONE
         }
 
-        // Gallery: trailers (thumbnail + nút play) lên đầu, sau đó tới screenshots.
-        val galleryItems = game.trailers.map { GalleryItem.Trailer(it) } +
+        // Gallery: tối đa 2 trailer (thumbnail + nút play) lên đầu, sau đó tới screenshots.
+        val galleryItems = game.trailers.take(2).map { GalleryItem.Trailer(it) } +
             game.screenshots.map { GalleryItem.Screenshot(it) }
         if (galleryItems.isNotEmpty()) {
             binding.tvVideoGalleryTitle.visibility = android.view.View.VISIBLE
