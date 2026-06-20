@@ -14,8 +14,8 @@ class SessionRepositoryImpl @Inject constructor(
     private val sessionsService: SessionsService
 ) : SessionRepository {
 
-    override suspend fun startSession(subscriptionId: Int) =
-        sessionsService.startSession(ReqStartSession(subscriptionId = subscriptionId))
+    override suspend fun startSession(subscriptionId: Int, gameId: Int?) =
+        sessionsService.startSession(ReqStartSession(subscriptionId = subscriptionId, gameId = gameId))
 
     override suspend fun getConnectionToken(
         sessionId: Int,

@@ -12,8 +12,8 @@ import network.ermis.genstreamui.domain.model.dto.res.ResSession
  */
 interface SessionRepository {
 
-    /** Mở một phiên chơi mới cho [subscriptionId] — POST /sessions. */
-    suspend fun startSession(subscriptionId: Int): ResultWrapper<ResSession>
+    /** Mở một phiên chơi mới cho [subscriptionId] — POST /sessions. [gameId] null nếu không gắn game. */
+    suspend fun startSession(subscriptionId: Int, gameId: Int? = null): ResultWrapper<ResSession>
 
     /** Xin token kết nối tới host của phiên [sessionId] — POST /sessions/{id}/connection-token. */
     suspend fun getConnectionToken(

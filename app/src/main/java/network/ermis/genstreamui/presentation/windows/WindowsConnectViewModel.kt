@@ -6,8 +6,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
@@ -18,12 +17,10 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import network.ermis.genstreamui.common.UiState
 import network.ermis.genstreamui.database.network.factory.ApiErrorCode
-import network.ermis.genstreamui.domain.model.AgentToken
 import network.ermis.genstreamui.domain.model.ConnectionToken
 import network.ermis.genstreamui.domain.model.Session
 import network.ermis.genstreamui.domain.model.SessionStatus
 import network.ermis.genstreamui.domain.model.TokenAuthResult
-import network.ermis.genstreamui.domain.usecase.session.CloseGameUseCase
 import network.ermis.genstreamui.domain.usecase.session.ConnectionTokenResult
 import network.ermis.genstreamui.domain.usecase.session.EndSessionUseCase
 import network.ermis.genstreamui.domain.usecase.session.GetAgentTokenUseCase
@@ -53,7 +50,6 @@ class WindowsConnectViewModel @Inject constructor(
     private val endSession: EndSessionUseCase,
     private val getAgentToken: GetAgentTokenUseCase,
     private val launchGame: LaunchGameUseCase,
-    private val closeGame: CloseGameUseCase,
     private val getUserSubscriptions: GetUserSubscriptionsUseCase,
     private val getActiveSessionBySubscription: GetActiveSessionBySubscriptionUseCase
 ) : ViewModel() {
@@ -73,7 +69,14 @@ class WindowsConnectViewModel @Inject constructor(
     // Play-Now: nếu [appId] > 0 thì sau khi Authorized sẽ launch game qua agent.
     private var platform: String = ""
     private var appId: Int = 0
-    private var agentToken: AgentToken? = null
+
+    // Game id (GenStream) gắn với phiên, gửi lên khi tạo session. null khi vào không gắn game (MineFragment).
+    private var gameId: Int? = null
+    // Tên game muốn chơi — chỉ để hiển thị dialog khi xung đột với phiên đang chạy.
+    private var gameTitle: String = ""
+
+    // Chờ user quyết định khi phiên cũ khác game (true = chơi game mới, false = tiếp tục game cũ).
+    private var conflictDecision: CompletableDeferred<Boolean>? = null
 
     /**
      * Điểm vào của màn: xác định subscription rồi mới connect.
@@ -83,10 +86,12 @@ class WindowsConnectViewModel @Inject constructor(
      *
      * [platform]/[appId] giữ cho cả luồng (Play-Now nếu appId > 0).
      */
-    fun start(platform: String = "", appId: Int = 0) {
+    fun start(platform: String = "", appId: Int = 0, gameId: Int? = null, gameTitle: String = "") {
         if (connectJob?.isActive == true || resolveJob?.isActive == true) return
         this.platform = platform
         this.appId = appId
+        this.gameId = gameId
+        this.gameTitle = gameTitle
         resolveJob = viewModelScope.launch {
             _stage.value = ConnectStage.ResolvingSubscription
             getUserSubscriptions().collect { state ->
@@ -95,7 +100,7 @@ class WindowsConnectViewModel @Inject constructor(
                         val subs = state.data
                         when {
                             subs.isEmpty() -> fail("Bạn chưa có gói thuê bao nào", canRetry = false)
-                            subs.size == 1 -> connect(subs.first().id, platform, appId)
+                            subs.size == 1 -> connect(subs.first().id, platform, appId, gameId, gameTitle)
                             else -> _stage.value = ConnectStage.ChoosingSubscription(subs)
                         }
                     }
@@ -108,23 +113,41 @@ class WindowsConnectViewModel @Inject constructor(
 
     /** User đã chọn 1 gói ở popup → chốt id và tiếp tục connect. */
     fun onSubscriptionChosen(subscriptionId: Int) {
-        connect(subscriptionId, platform, appId)
+        connect(subscriptionId, platform, appId, gameId, gameTitle)
     }
 
     /** Thử lại: nếu đã chốt subscription thì connect lại luôn, chưa thì resolve lại từ đầu. */
     fun retry() {
         val id = resolvedSubscriptionId
-        if (id != null) connect(id, platform, appId) else start(platform, appId)
+        if (id != null) connect(id, platform, appId, gameId, gameTitle)
+        else start(platform, appId, gameId, gameTitle)
+    }
+
+    /**
+     * User đã chọn ở dialog xung đột phiên ([ConnectStage.ConflictingSession]):
+     * [playNew] = true → end phiên cũ + tạo phiên mới với game mới; false → connect vào phiên cũ.
+     */
+    fun onSessionConflictResolved(playNew: Boolean) {
+        conflictDecision?.complete(playNew)
+        conflictDecision = null
     }
 
     /**
      * Bắt đầu (hoặc thử lại) luồng kết nối cho [subscriptionId].
      * [platform]/[appId]: nếu [appId] > 0 → Play-Now (mở sẵn game qua agent); 0 → chỉ stream Desktop.
      */
-    fun connect(subscriptionId: Int, platform: String = "", appId: Int = 0) {
+    fun connect(
+        subscriptionId: Int,
+        platform: String = "",
+        appId: Int = 0,
+        gameId: Int? = null,
+        gameTitle: String = ""
+    ) {
         if (connectJob?.isActive == true) return
         this.platform = platform
         this.appId = appId
+        this.gameId = gameId
+        this.gameTitle = gameTitle
         this.resolvedSubscriptionId = subscriptionId
         connectJob = viewModelScope.launch {
             _stage.value = ConnectStage.CreatingSession
@@ -171,7 +194,6 @@ class WindowsConnectViewModel @Inject constructor(
 
         val tokenState = getAgentToken(sessionId)
         if (tokenState is UiState.Success) {
-            agentToken = tokenState.data
             val result = launchGame(tokenState.data, p, appId)
             Log.i(TAG, "Stage 3a: agent /launch result = $result")
         } else {
@@ -181,17 +203,28 @@ class WindowsConnectViewModel @Inject constructor(
 
     /**
      * Stage 0. Tạo phiên mới; nếu backend báo gói đã có phiên active (409 SESSION_INVALID_STATE)
-     * thì lấy lại chính phiên đó để tiếp tục connect (không coi là lỗi). Trả null (đã set Failed) nếu lỗi.
+     * thì giải quyết phiên cũ (trùng game → tiếp tục; khác game → hỏi user). Trả null nếu lỗi/chưa có
+     * phiên để connect (đã set Failed hoặc đang chờ ở stage khác).
      */
     private suspend fun startSessionOrNull(subscriptionId: Int): Session? {
+        val (session, alreadyHasActiveSession) = requestNewSession(subscriptionId)
+        if (session != null) return session
+        if (alreadyHasActiveSession) return resolveActiveSessionOrNull(subscriptionId)
+        return null
+    }
+
+    /**
+     * Gọi POST /sessions với [gameId]. Trả (phiên mới, false) nếu tạo được; (null, true) nếu gói đã có
+     * phiên active (409 SESSION_INVALID_STATE); (null, false) nếu lỗi khác (đã set Failed).
+     */
+    private suspend fun requestNewSession(subscriptionId: Int): Pair<Session?, Boolean> {
         var session: Session? = null
         var alreadyHasActiveSession = false
-        startSession(subscriptionId).collect { state ->
+        startSession(subscriptionId, gameId).collect { state ->
             when (state) {
                 is UiState.Success -> session = state.data
                 is UiState.Error ->
                     if (ApiErrorCode.from(state.code) == ApiErrorCode.SESSION_INVALID_STATE) {
-                        // Gói đã có phiên đang chạy → lấy lại phiên đó ở bước sau, không fail.
                         alreadyHasActiveSession = true
                     } else {
                         fail(state.message)
@@ -199,12 +232,57 @@ class WindowsConnectViewModel @Inject constructor(
                 else -> Unit
             }
         }
+        return session to alreadyHasActiveSession
+    }
+
+    /**
+     * Gói đã có phiên đang chạy → lấy phiên đó (GET active-session) và xử lý theo game
+     * (coi game_id = null hoặc 0/empty là "không gắn game"):
+     * - Cùng "game" (trùng game_id, hoặc cả hai đều không gắn game) → tiếp tục phiên cũ.
+     * - Cả hai đều gắn game cụ thể nhưng KHÁC nhau → hiện dialog cho user chọn (tiếp tục cũ / chơi mới).
+     * - Các trường hợp lệch còn lại (một bên không gắn game) → tự động end cũ + tạo mới (không hỏi).
+     */
+    private suspend fun resolveActiveSessionOrNull(subscriptionId: Int): Session? {
+        val active = activeSessionOrNull(subscriptionId) ?: return null
+
+        val oldGameId = active.gameId?.takeIf { it != 0 }
+        val newGameId = gameId?.takeIf { it != 0 }
+
+        // Trùng game (kể cả cả hai đều không gắn game) → tiếp tục phiên cũ.
+        if (oldGameId == newGameId) return active
+
+        // Cả hai cùng gắn game cụ thể nhưng khác nhau → hỏi user.
+        if (oldGameId != null && newGameId != null) {
+            _stage.value = ConnectStage.ConflictingSession(
+                oldGameTitle = active.gameTitle.orEmpty(),
+                newGameTitle = gameTitle
+            )
+            val playNew = awaitConflictDecision()
+            if (!playNew) return active // Tiếp tục game cũ → connect thẳng vào phiên cũ.
+        }
+
+        // Còn lại (một bên không gắn game), hoặc user chọn chơi game mới → end cũ + tạo mới.
+        return endOldAndStartNew(subscriptionId, active.id)
+    }
+
+    /** End phiên cũ [oldSessionId] rồi tạo phiên mới với [gameId] hiện tại. null nếu lỗi (đã set Failed). */
+    private suspend fun endOldAndStartNew(subscriptionId: Int, oldSessionId: Int): Session? {
+        _stage.value = ConnectStage.CreatingSession
+        if (!endSessionAndWait(oldSessionId)) return null
+        val (session, stillActive) = requestNewSession(subscriptionId)
         if (session != null) return session
-        if (alreadyHasActiveSession) return activeSessionOrNull(subscriptionId)
+        if (stillActive) fail("Phiên cũ chưa kết thúc, vui lòng thử lại")
         return null
     }
 
-    /** Lấy phiên đang active của [subscriptionId] để tiếp tục connect. null (đã set Failed) nếu lỗi. */
+    /** Treo tới khi user chọn ở dialog xung đột (true = game mới, false = game cũ). */
+    private suspend fun awaitConflictDecision(): Boolean {
+        val deferred = CompletableDeferred<Boolean>()
+        conflictDecision = deferred
+        return deferred.await()
+    }
+
+    /** Lấy phiên đang active của [subscriptionId]. null (đã set Failed) nếu lỗi. */
     private suspend fun activeSessionOrNull(subscriptionId: Int): Session? {
         var session: Session? = null
         getActiveSessionBySubscription(subscriptionId).collect { state ->
@@ -215,6 +293,19 @@ class WindowsConnectViewModel @Inject constructor(
             }
         }
         return session
+    }
+
+    /** End phiên [id]; true nếu thành công. Set Failed nếu lỗi. */
+    private suspend fun endSessionAndWait(id: Int): Boolean {
+        var ok = false
+        endSession(id).collect { state ->
+            when (state) {
+                is UiState.Success -> ok = true
+                is UiState.Error -> fail(state.message)
+                else -> Unit
+            }
+        }
+        return ok
     }
 
     /** Stage 1. Poll tới khi VM sẵn sàng (Issued) hoặc hết ngân sách / lỗi (đã set Failed). */
@@ -266,25 +357,14 @@ class WindowsConnectViewModel @Inject constructor(
     }
 
     /**
-     * Hủy kết nối + best-effort kết thúc phiên để giải phóng VM (không thì backend reap sau 180s).
-     * Chạy ngoài [viewModelScope] vì scope đã bị hủy khi rời màn.
+     * Hủy kết nối khi rời màn: chỉ dừng các job (đặc biệt là heartbeat). KHÔNG /close game hay /end
+     * phiên — server tự đóng VM khi không còn nhận heartbeat, nên app không cần end chủ động.
      */
     fun cancelAndRelease() {
         resolveJob?.cancel()
         connectJob?.cancel()
         heartbeatJob?.cancel()
-        val id = sessionId ?: return
         sessionId = null
-        val at = agentToken
-        val p = platform.ifEmpty { DEFAULT_PLATFORM }
-        val app = appId
-        CoroutineScope(Dispatchers.IO).launch {
-            runCatching {
-                // §9: phải /close TRƯỚC /end (sau /end agent verify token sẽ fail).
-                if (at != null && app > 0) closeGame(at, p, app)
-                endSession(id).collect { }
-            }
-        }
     }
 
     override fun onCleared() {

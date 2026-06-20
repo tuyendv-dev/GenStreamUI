@@ -30,7 +30,9 @@ data class Session(
     val lastHeartbeatAt: String = "",
     val stoppedAt: String = "",
     val userEmail: String = "",
-    val serverHostname: String = ""
+    val serverHostname: String = "",
+    val gameId: Int? = null,
+    val gameTitle: String? = null
 ) {
     /** Trạng thái phiên (theo backend). Dùng [SessionStatus] để so khớp an toàn. */
     val sessionStatus: SessionStatus get() = SessionStatus.from(status)

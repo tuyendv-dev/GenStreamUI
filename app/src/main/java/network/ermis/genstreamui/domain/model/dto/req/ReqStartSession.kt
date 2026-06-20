@@ -7,5 +7,8 @@ import com.google.gson.annotations.SerializedName
 @Keep
 data class ReqStartSession(
     @SerializedName("subscription_id")
-    val subscriptionId: Int = 0
+    val subscriptionId: Int = 0,
+    /** Game gắn với phiên (Play-Now); null khi mở phiên không gắn game cụ thể (vd vào từ MineFragment). */
+    @SerializedName("game_id")
+    val gameId: Int? = null
 )

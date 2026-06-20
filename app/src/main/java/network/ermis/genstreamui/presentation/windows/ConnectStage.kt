@@ -21,6 +21,16 @@ sealed interface ConnectStage {
     /** Stage 0 — tạo phiên. */
     data object CreatingSession : ConnectStage
 
+    /**
+     * Gói đang có phiên chạy game khác với game user muốn chơi → cần user chọn:
+     * tiếp tục [oldGameTitle] (connect phiên cũ) hay chuyển sang [newGameTitle] (end cũ + tạo mới).
+     * Sau khi chọn, gọi [WindowsConnectViewModel.onSessionConflictResolved].
+     */
+    data class ConflictingSession(
+        val oldGameTitle: String,
+        val newGameTitle: String
+    ) : ConnectStage
+
     /** Stage 1 — chờ VM provision (đang poll connection-token). [attempt] = lần poll thứ mấy. */
     data class WaitingForVm(val attempt: Int) : ConnectStage
 

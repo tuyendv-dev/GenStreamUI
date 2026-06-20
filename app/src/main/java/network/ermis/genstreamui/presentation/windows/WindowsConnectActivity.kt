@@ -49,6 +49,12 @@ class WindowsConnectActivity : AppCompatActivity() {
     private val platform: String by lazy { intent.getStringExtra(EXTRA_PLATFORM).orEmpty() }
     private val appId: Int by lazy { intent.getIntExtra(EXTRA_APP_ID, 0) }
 
+    // Game id (GenStream) gắn với phiên; -1 (không truyền) → null khi tạo session (vd vào từ MineFragment).
+    private val gameId: Int? by lazy { intent.getIntExtra(EXTRA_GAME_ID, -1).takeIf { it > 0 } }
+
+    // Tên game muốn chơi — chỉ để hiển thị dialog xung đột phiên.
+    private val gameTitle: String by lazy { intent.getStringExtra(EXTRA_GAME_TITLE).orEmpty() }
+
     // true (mặc định, Import PC games) → mở lưới AppView; false (Play Now) → stream thẳng vào game.
     private val openAppList: Boolean by lazy { intent.getBooleanExtra(EXTRA_OPEN_APP_LIST, true) }
 
@@ -62,6 +68,9 @@ class WindowsConnectActivity : AppCompatActivity() {
 
     // Popup chọn gói (khi user có nhiều hơn 1 subscription) — non-cancelable, giữ ref để tránh mở trùng.
     private var subscriptionDialog: androidx.appcompat.app.AlertDialog? = null
+
+    // Dialog hỏi khi gói đang chạy game khác với game muốn chơi — giữ ref để tránh mở trùng.
+    private var conflictDialog: androidx.appcompat.app.AlertDialog? = null
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
@@ -95,7 +104,7 @@ class WindowsConnectActivity : AppCompatActivity() {
 
         observeStage()
         // Subscription được xác định từ GET /users/me/subscriptions (auto nếu 1 gói, popup nếu nhiều).
-        viewModel.start(platform, appId)
+        viewModel.start(platform, appId, gameId, gameTitle)
     }
 
     private fun observeStage() {
@@ -109,6 +118,8 @@ class WindowsConnectActivity : AppCompatActivity() {
     private fun render(stage: ConnectStage) {
         // Đóng popup chọn gói nếu rời khỏi stage chọn (vd retry/đã chọn xong).
         if (stage !is ConnectStage.ChoosingSubscription) dismissSubscriptionPicker()
+        // Đóng dialog xung đột nếu đã rời khỏi stage đó (đã chọn xong).
+        if (stage !is ConnectStage.ConflictingSession) dismissConflictDialog()
 
         when (stage) {
             ConnectStage.Idle,
@@ -117,6 +128,8 @@ class WindowsConnectActivity : AppCompatActivity() {
             is ConnectStage.ChoosingSubscription -> showSubscriptionPicker(stage.options)
 
             ConnectStage.CreatingSession -> showProgress("Đang tạo phiên...", "")
+
+            is ConnectStage.ConflictingSession -> showSessionConflictDialog(stage)
 
             is ConnectStage.WaitingForVm ->
                 showProgress("Đang khởi tạo máy ảo...", "Vui lòng đợi (lần ${stage.attempt})")
@@ -247,6 +260,53 @@ class WindowsConnectActivity : AppCompatActivity() {
         subscriptionDialog = null
     }
 
+    /**
+     * Dialog (layout tuỳ biến) khi gói đang chạy game khác ([ConnectStage.ConflictingSession]):
+     * - "Tiếp tục <game cũ>": connect vào phiên đang chạy (onSessionConflictResolved(false)).
+     * - "Chơi <game mới>": end phiên cũ + tạo phiên mới (onSessionConflictResolved(true)).
+     * - Nút X: đóng dialog và thoát luôn màn kết nối.
+     */
+    private fun showSessionConflictDialog(stage: ConnectStage.ConflictingSession) {
+        if (conflictDialog?.isShowing == true) return
+
+        val oldName = stage.oldGameTitle.ifEmpty { "game đang chạy" }
+        val newName = stage.newGameTitle.ifEmpty { "game mới" }
+
+        val dialogBinding = network.ermis.genstreamui.databinding.DialogSessionConflictBinding.inflate(layoutInflater)
+        dialogBinding.tvSubtitle.text = "“$oldName” vẫn đang chạy."
+        dialogBinding.tvContinueOld.text = "Tiếp tục “$oldName”"
+        dialogBinding.tvPlayNew.text = "Chơi “$newName”"
+
+        conflictDialog = androidx.appcompat.app.AlertDialog.Builder(this)
+            .setView(dialogBinding.root)
+            .setCancelable(false)
+            .create()
+            .apply {
+                window?.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
+                setCanceledOnTouchOutside(false)
+                setOnKeyListener { _, keyCode, _ -> keyCode == android.view.KeyEvent.KEYCODE_BACK }
+            }
+
+        dialogBinding.btnContinueOld.setOnClickListener {
+            viewModel.onSessionConflictResolved(playNew = false)
+        }
+        dialogBinding.btnPlayNew.setOnClickListener {
+            viewModel.onSessionConflictResolved(playNew = true)
+        }
+        // Nút X: đóng dialog và thoát màn kết nối.
+        dialogBinding.btnClose.setOnClickListener {
+            dismissConflictDialog()
+            finish()
+        }
+
+        conflictDialog?.show()
+    }
+
+    private fun dismissConflictDialog() {
+        conflictDialog?.dismiss()
+        conflictDialog = null
+    }
+
     /** Bỏ phần thập phân thừa: 60.0 -> "60", 12.5 -> "12.5". */
     private fun formatHours(hours: Double): String =
         if (hours % 1.0 == 0.0) hours.toLong().toString() else hours.toString()
@@ -279,13 +339,15 @@ class WindowsConnectActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        // Đã mở stream/AppView rồi quay lại đây → đóng màn luôn (ViewModel.onCleared sẽ end phiên).
+        // Đã mở stream/AppView rồi quay lại đây → đóng màn luôn (ViewModel.onCleared chỉ dừng heartbeat,
+        // server tự đóng VM khi hết heartbeat — không end phiên từ app).
         if (finishOnReturn) finish()
     }
 
     override fun onDestroy() {
         setKeepScreenOn(false)
         dismissSubscriptionPicker()
+        dismissConflictDialog()
         if (serviceBound) {
             unbindService(serviceConnection)
             serviceBound = false
@@ -299,6 +361,12 @@ class WindowsConnectActivity : AppCompatActivity() {
 
         /** (Play-Now) appid của game trên host; <= 0 nghĩa là chỉ stream Desktop. */
         const val EXTRA_APP_ID = "extra_app_id"
+
+        /** Game id (GenStream) gắn với phiên, gửi lên khi tạo session; <= 0 / không truyền → null. */
+        const val EXTRA_GAME_ID = "extra_game_id"
+
+        /** Tên game muốn chơi — chỉ để hiển thị dialog xung đột phiên. */
+        const val EXTRA_GAME_TITLE = "extra_game_title"
 
         /** true (Import PC games) → mở lưới AppView; false (Play Now) → stream thẳng vào game. */
         const val EXTRA_OPEN_APP_LIST = "extra_open_app_list"

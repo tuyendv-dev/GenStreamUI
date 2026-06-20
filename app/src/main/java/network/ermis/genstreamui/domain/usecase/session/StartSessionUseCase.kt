@@ -18,10 +18,10 @@ import javax.inject.Inject
 class StartSessionUseCase @Inject constructor(
     private val sessionRepository: SessionRepository
 ) {
-    operator fun invoke(subscriptionId: Int) = flow<UiState<Session>> {
+    operator fun invoke(subscriptionId: Int, gameId: Int? = null) = flow<UiState<Session>> {
         emit(UiState.Loading)
         try {
-            when (val response = sessionRepository.startSession(subscriptionId)) {
+            when (val response = sessionRepository.startSession(subscriptionId, gameId)) {
                 is ResultWrapper.Success -> {
                     val data = response.value.data
                     if (data != null) {

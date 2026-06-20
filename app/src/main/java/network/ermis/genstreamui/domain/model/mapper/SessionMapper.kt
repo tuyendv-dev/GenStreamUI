@@ -30,5 +30,7 @@ fun SessionDTO.toDomain(): Session = Session(
     lastHeartbeatAt = lastHeartbeatAt.orEmpty(),
     stoppedAt = stoppedAt.orEmpty(),
     userEmail = userEmail.orEmpty(),
-    serverHostname = serverHostname.orEmpty()
+    serverHostname = serverHostname.orEmpty(),
+    gameId = gameId,
+    gameTitle = gameTitle
 )

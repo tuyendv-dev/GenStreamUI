@@ -469,6 +469,10 @@ class PlayGameActivity : AppCompatActivity() {
                 if (steamId > 0) "steam" else currentGame?.platforms?.firstOrNull().orEmpty()
             )
             putExtra(WindowsConnectActivity.EXTRA_APP_ID, steamId)
+            // game_id (GenStream) gắn với phiên — gửi lên POST /sessions.
+            currentGame?.id?.let { putExtra(WindowsConnectActivity.EXTRA_GAME_ID, it) }
+            // Tên game — để hiển thị dialog khi gói đang chạy game khác.
+            putExtra(WindowsConnectActivity.EXTRA_GAME_TITLE, currentGame?.title.orEmpty())
         }
         startActivity(intent)
     }

@@ -52,5 +52,9 @@ data class SessionDTO(
     @SerializedName("user_email")
     val userEmail: String? = null,
     @SerializedName("server_hostname")
-    val serverHostname: String? = null
+    val serverHostname: String? = null,
+    @SerializedName("game_id")
+    val gameId: Int? = null,
+    @SerializedName("game_title")
+    val gameTitle: String? = null
 )
