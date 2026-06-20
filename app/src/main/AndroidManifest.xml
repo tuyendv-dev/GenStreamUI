@@ -43,6 +43,12 @@
             android:exported="false" />
 
         <activity
+            android:name=".presentation.preview.PreviewMediaActivity"
+            android:screenOrientation="sensorLandscape"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:exported="false" />
+
+        <activity
             android:name=".presentation.setting.SettingActivity"
             android:screenOrientation="sensorLandscape"
             android:exported="false" />

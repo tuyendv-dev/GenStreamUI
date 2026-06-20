@@ -21,6 +21,7 @@ import network.ermis.genstreamui.databinding.ActivityPlayGameBinding
 import network.ermis.genstreamui.domain.model.Game
 import network.ermis.genstreamui.domain.model.extension.getGameBackground
 import network.ermis.genstreamui.domain.model.extension.getShortDescriptionExt
+import network.ermis.genstreamui.presentation.preview.PreviewMediaActivity
 import network.ermis.genstreamui.presentation.widget.setupStatusIcons
 import network.ermis.genstreamui.presentation.windows.WindowsConnectActivity
 
@@ -184,6 +185,12 @@ class PlayGameActivity : AppCompatActivity() {
         web.setBackgroundColor(android.graphics.Color.TRANSPARENT)
         web.isVerticalScrollBarEnabled = false
 
+        // Chặn bôi đen chữ / menu copy: nuốt long-press và vô hiệu long-click ở tầng Android
+        // (CSS user-select:none ở dưới lo phần còn lại trong trang).
+        web.setOnLongClickListener { true }
+        web.isLongClickable = false
+        web.isHapticFeedbackEnabled = false
+
         // WebView render CSS px ≈ dp; sp = dp * fontScale nên nhân fontScale để chữ tính theo sp.
         // Body 14sp, tiêu đề bị cắt còn tối đa 14sp (HTML Steam có h2 mặc định rất to).
         val fontScale = resources.configuration.fontScale
@@ -197,6 +204,10 @@ class PlayGameActivity : AppCompatActivity() {
               <meta charset="utf-8">
               <meta name="viewport" content="width=device-width, initial-scale=1">
               <style>
+                /* Chặn người dùng bôi đen/copy nội dung */
+                * { -webkit-user-select:none; -khtml-user-select:none; -moz-user-select:none;
+                    -ms-user-select:none; user-select:none; -webkit-touch-callout:none;
+                    -webkit-tap-highlight-color:transparent; }
                 body { margin:0; padding:0; background:transparent; color:#FFFFFF;
                        font-family:sans-serif; font-size:${bodyFontPx}px; line-height:1.6; word-wrap:break-word; }
                 img, video { max-width:100%; height:auto; border-radius:8px; }
@@ -384,9 +395,33 @@ class PlayGameActivity : AppCompatActivity() {
                 is GalleryItem.Screenshot ->
                     (holder as ScreenshotViewHolder).ivScreenshot.loadCover(item.url)
             }
+            holder.itemView.setOnClickListener { openPreview(holder.bindingAdapterPosition) }
         }
 
         override fun getItemCount() = items.size
+
+        /** Mở PreviewMediaActivity với toàn bộ gallery, nhảy tới [position] vừa tap. */
+        private fun openPreview(position: Int) {
+            if (position == androidx.recyclerview.widget.RecyclerView.NO_POSITION) return
+            val urls = ArrayList<String>(items.size)
+            val thumbs = ArrayList<String>(items.size)
+            val isVideo = BooleanArray(items.size)
+            items.forEachIndexed { i, item ->
+                when (item) {
+                    is GalleryItem.Trailer -> {
+                        urls.add(item.trailer.video)
+                        thumbs.add(item.trailer.thumbnail)
+                        isVideo[i] = true
+                    }
+                    is GalleryItem.Screenshot -> {
+                        urls.add(item.url)
+                        thumbs.add("")
+                        isVideo[i] = false
+                    }
+                }
+            }
+            PreviewMediaActivity.start(this@PlayGameActivity, urls, thumbs, isVideo, position)
+        }
     }
 
     /** Mở WindowsConnectActivity ở chế độ Play Now (stream thẳng vào game, không qua lưới AppView). */

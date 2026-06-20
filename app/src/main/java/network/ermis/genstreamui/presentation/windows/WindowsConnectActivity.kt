@@ -233,6 +233,12 @@ class WindowsConnectActivity : AppCompatActivity() {
             viewModel.onSubscriptionChosen(options[adapter.getSelectedIndex()].id)
         }
 
+        // Nút close: đóng dialog và thoát luôn màn hiện tại.
+        dialogBinding.btnClose.setOnClickListener {
+            dismissSubscriptionPicker()
+            finish()
+        }
+
         subscriptionDialog?.show()
     }
 

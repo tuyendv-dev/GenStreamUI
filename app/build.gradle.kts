@@ -86,6 +86,14 @@ dependencies {
     ksp("com.github.bumptech.glide:ksp:4.16.0")
     implementation("com.google.code.gson:gson:2.10.1")
 
+    // ViewPager2 (màn PreviewMedia vuốt qua lại ảnh/video)
+    implementation("androidx.viewpager2:viewpager2:1.1.0")
+
+    // Media3 ExoPlayer (trình phát trailer; HLS m3u8)
+    implementation("androidx.media3:media3-exoplayer:1.4.1")
+    implementation("androidx.media3:media3-exoplayer-hls:1.4.1")
+    implementation("androidx.media3:media3-ui:1.4.1")
+
     // Dependency Injection - Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
