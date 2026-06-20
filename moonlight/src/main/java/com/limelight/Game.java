@@ -1079,6 +1079,17 @@ public class Game extends Activity implements SurfaceHolder.Callback,
         super.onPause();
     }
 
+    // GenStream: Back điều hướng hệ thống hỏi xác nhận trước khi rời stream.
+    // (Back từ chuột phải/controller đã được handleKeyDown tiêu thụ nên không tới đây.)
+    @Override
+    public void onBackPressed() {
+        new android.app.AlertDialog.Builder(this)
+                .setMessage("Bạn có muốn thoát không?")
+                .setNegativeButton("Hủy", null)
+                .setPositiveButton("Thoát", (d, w) -> Game.super.onBackPressed())
+                .show();
+    }
+
     @Override
     protected void onStop() {
         super.onStop();

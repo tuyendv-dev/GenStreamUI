@@ -369,6 +369,16 @@ public class AppView extends Activity implements AdapterFragmentCallbacks {
         }
     }
 
+    // GenStream: nhấn Back hỏi xác nhận trước khi thoát màn chọn app.
+    @Override
+    public void onBackPressed() {
+        new android.app.AlertDialog.Builder(this)
+                .setMessage("Bạn có muốn thoát không?")
+                .setNegativeButton("Hủy", null)
+                .setPositiveButton("Thoát", (d, w) -> AppView.super.onBackPressed())
+                .show();
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
