@@ -184,6 +184,12 @@ class PlayGameActivity : AppCompatActivity() {
         web.setBackgroundColor(android.graphics.Color.TRANSPARENT)
         web.isVerticalScrollBarEnabled = false
 
+        // WebView render CSS px ≈ dp; sp = dp * fontScale nên nhân fontScale để chữ tính theo sp.
+        // Body 14sp, tiêu đề bị cắt còn tối đa 14sp (HTML Steam có h2 mặc định rất to).
+        val fontScale = resources.configuration.fontScale
+        val bodyFontPx = (14f * fontScale).toInt().coerceAtLeast(1)
+        val maxFontPx = (14f * fontScale).toInt().coerceAtLeast(1)
+
         val document = """
             <!DOCTYPE html>
             <html>
@@ -192,10 +198,10 @@ class PlayGameActivity : AppCompatActivity() {
               <meta name="viewport" content="width=device-width, initial-scale=1">
               <style>
                 body { margin:0; padding:0; background:transparent; color:#FFFFFF;
-                       font-family:sans-serif; font-size:14px; line-height:1.6; word-wrap:break-word; }
+                       font-family:sans-serif; font-size:${bodyFontPx}px; line-height:1.6; word-wrap:break-word; }
                 img, video { max-width:100%; height:auto; border-radius:8px; }
                 a { color:#4DA3FF; }
-                h1, h2 { color:#FFFFFF; }
+                h1, h2, h3, h4, h5, h6 { color:#FFFFFF; font-size:${maxFontPx}px; }
               </style>
             </head>
             <body>$html</body>
@@ -254,12 +260,18 @@ class PlayGameActivity : AppCompatActivity() {
     private fun bindGameInfo(game: Game) {
         binding.tvAgeRating.text = if (game.requiredAge > 0) game.requiredAge.toString() else "—"
 
-        // supported_languages là HTML + nhiều ngôn ngữ; lấy ngôn ngữ đầu, bỏ tag.
-        val language = game.supportedLanguages
-            .substringBefore(",")
+        // supported_languages là HTML + nhiều ngôn ngữ cách nhau bằng dấu phẩy; bỏ tag, tách danh sách.
+        // Hiển thị ngôn ngữ đầu + "+N" với N = số ngôn ngữ còn lại (nếu có).
+        val languages = game.supportedLanguages
             .replace(Regex("<[^>]*>"), "")
-            .trim()
-        binding.tvLanguage.text = language.ifBlank { "—" }
+            .split(",")
+            .map { it.trim() }
+            .filter { it.isNotBlank() }
+        binding.tvLanguage.text = when {
+            languages.isEmpty() -> "—"
+            languages.size == 1 -> languages.first()
+            else -> "${languages.first()} ${languages.size - 1}+"
+        }
 
         binding.tvDeveloper.text =
             game.developers.firstOrNull()?.takeIf { it.isNotBlank() }
@@ -289,19 +301,31 @@ class PlayGameActivity : AppCompatActivity() {
         }
 
         if (game.detailedDescription.isNotBlank()) {
+            binding.tvMoreTitle.visibility = android.view.View.VISIBLE
             binding.wvDetailedDescription.visibility = android.view.View.VISIBLE
             bindDetailedDescription(game.detailedDescription)
         } else {
+            binding.tvMoreTitle.visibility = android.view.View.GONE
             binding.wvDetailedDescription.visibility = android.view.View.GONE
         }
 
-        if (game.screenshots.isNotEmpty()) {
+        // Gallery: trailers (thumbnail + nút play) lên đầu, sau đó tới screenshots.
+        val galleryItems = game.trailers.map { GalleryItem.Trailer(it) } +
+            game.screenshots.map { GalleryItem.Screenshot(it) }
+        if (galleryItems.isNotEmpty()) {
             binding.tvVideoGalleryTitle.visibility = android.view.View.VISIBLE
             binding.rvScreenshots.visibility = android.view.View.VISIBLE
-            binding.rvScreenshots.adapter = ScreenshotAdapter(game.screenshots)
+            binding.rvScreenshots.adapter = GalleryAdapter(galleryItems)
         } else {
             binding.tvVideoGalleryTitle.visibility = android.view.View.GONE
             binding.rvScreenshots.visibility = android.view.View.GONE
+        }
+
+        if (game.legalNotice.isNotBlank()) {
+            binding.tvLegalNotice.visibility = android.view.View.VISIBLE
+            binding.tvLegalNotice.text = game.legalNotice
+        } else {
+            binding.tvLegalNotice.visibility = android.view.View.GONE
         }
 
         binding.ivGameArtwork.loadCover(game.getGameBackground()) { zoomOutArtwork() }
@@ -312,20 +336,54 @@ class PlayGameActivity : AppCompatActivity() {
         binding.nsvGameDetails.post { binding.nsvGameDetails.scrollTo(0, 0) }
     }
 
-    private inner class ScreenshotAdapter(private val items: List<String>) :
-        androidx.recyclerview.widget.RecyclerView.Adapter<ScreenshotAdapter.ViewHolder>() {
+    /** Phần tử của video gallery: trailer (có thumbnail + nút play) hoặc screenshot (chỉ ảnh). */
+    private sealed interface GalleryItem {
+        data class Trailer(val trailer: network.ermis.genstreamui.domain.model.GameTrailer) : GalleryItem
+        data class Screenshot(val url: String) : GalleryItem
+    }
 
-        inner class ViewHolder(val view: android.view.View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(view) {
+    /**
+     * Adapter cho rvScreenshots với 2 loại item: trailer hiện thumbnail + nút play ở giữa,
+     * screenshot chỉ hiện ảnh. Trailers luôn đứng trước screenshots (xem bindGame).
+     */
+    private inner class GalleryAdapter(private val items: List<GalleryItem>) :
+        androidx.recyclerview.widget.RecyclerView.Adapter<androidx.recyclerview.widget.RecyclerView.ViewHolder>() {
+
+        private val typeTrailer = 0
+        private val typeScreenshot = 1
+
+        inner class TrailerViewHolder(view: android.view.View) :
+            androidx.recyclerview.widget.RecyclerView.ViewHolder(view) {
+            val ivThumb: android.widget.ImageView = view.findViewById(network.ermis.genstreamui.R.id.ivTrailerThumb)
+        }
+
+        inner class ScreenshotViewHolder(view: android.view.View) :
+            androidx.recyclerview.widget.RecyclerView.ViewHolder(view) {
             val ivScreenshot: android.widget.ImageView = view.findViewById(network.ermis.genstreamui.R.id.ivScreenshot)
         }
 
-        override fun onCreateViewHolder(parent: android.view.ViewGroup, viewType: Int): ViewHolder {
-            val view = layoutInflater.inflate(network.ermis.genstreamui.R.layout.item_screenshot, parent, false)
-            return ViewHolder(view)
-        }
+        override fun getItemViewType(position: Int) =
+            if (items[position] is GalleryItem.Trailer) typeTrailer else typeScreenshot
 
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            holder.ivScreenshot.loadCover(items[position])
+        override fun onCreateViewHolder(parent: android.view.ViewGroup, viewType: Int):
+            androidx.recyclerview.widget.RecyclerView.ViewHolder =
+            if (viewType == typeTrailer) {
+                TrailerViewHolder(
+                    layoutInflater.inflate(network.ermis.genstreamui.R.layout.item_trailer, parent, false)
+                )
+            } else {
+                ScreenshotViewHolder(
+                    layoutInflater.inflate(network.ermis.genstreamui.R.layout.item_screenshot, parent, false)
+                )
+            }
+
+        override fun onBindViewHolder(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder, position: Int) {
+            when (val item = items[position]) {
+                is GalleryItem.Trailer ->
+                    (holder as TrailerViewHolder).ivThumb.loadCover(item.trailer.thumbnail)
+                is GalleryItem.Screenshot ->
+                    (holder as ScreenshotViewHolder).ivScreenshot.loadCover(item.url)
+            }
         }
 
         override fun getItemCount() = items.size

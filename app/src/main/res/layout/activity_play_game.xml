@@ -247,6 +247,7 @@
 
                     <!-- More Button (...) -->
                     <TextView
+                        android:visibility="gone"
                         android:id="@+id/btnMore"
                         android:layout_width="44dp"
                         android:layout_height="44dp"
@@ -447,14 +448,38 @@
                 android:textSize="14sp"
                 android:layout_marginHorizontal="40dp"/>
 
+            <!-- More (tiêu đề cho detailed description) -->
+            <TextView
+                android:id="@+id/tvMoreTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:text="More"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginHorizontal="40dp"/>
+
             <!-- Detailed description (HTML) -->
             <WebView
                 android:id="@+id/wvDetailedDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="6dp"
                 android:overScrollMode="never"
                 android:layout_marginHorizontal="40dp"/>
+
+            <!-- Legal notice / bản quyền: căn giữa, in nghiêng, cuối màn. -->
+            <TextView
+                android:id="@+id/tvLegalNotice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:layout_marginHorizontal="40dp"
+                android:gravity="center"
+                android:textStyle="italic"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp"/>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

@@ -41,5 +41,6 @@ data class GameEntity(
     val hot: Boolean = false,
     val recommended: Boolean = false,
     val isActive: Boolean = false,
-    val steamAppid: Int = 0
+    val steamAppid: Int = 0,
+    val legalNotice: String = ""
 )

@@ -47,7 +47,8 @@ fun GameDTO.toDomain(): Game = Game(
     hot = hot ?: false,
     recommended = recommended ?: false,
     isActive = isActive ?: false,
-    steamAppid = steamAppid ?: 0
+    steamAppid = steamAppid ?: 0,
+    legalNotice = legalNotice.orEmpty()
 )
 
 fun GameTrailerDTO.toDomain(): GameTrailer = GameTrailer(

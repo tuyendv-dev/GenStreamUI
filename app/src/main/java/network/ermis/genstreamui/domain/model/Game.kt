@@ -37,5 +37,7 @@ data class Game(
     val recommended: Boolean = false,
     val isActive: Boolean = false,
     // Steam App ID (cho agent /launch khi Play Now game Steam). 0 nếu không có.
-    val steamAppid: Int = 0
+    val steamAppid: Int = 0,
+    // Ghi chú pháp lý/bản quyền (hiển thị cuối màn chi tiết game).
+    val legalNotice: String = ""
 )
